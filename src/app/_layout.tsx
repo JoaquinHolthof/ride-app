@@ -26,6 +26,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: 'RIDE' }} />
+        <Stack.Screen name="station/[id]" options={{ title: 'Station details' }} />
       </Stack>
     </ThemeProvider>
   );

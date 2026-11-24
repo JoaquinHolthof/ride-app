@@ -27,6 +27,12 @@ export const Spacing = {
 
 // Use native system sans fonts; no font download is needed on first launch.
 export const Typography = {
+  count: {
+    fontSize: 44,
+    lineHeight: 52,
+    fontWeight: '800',
+    letterSpacing: -1,
+  },
   display: {
     fontSize: 88,
     lineHeight: 92,

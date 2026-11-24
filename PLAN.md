@@ -77,6 +77,12 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - No backend or auth
 
 ## Priorities
+### Current implementation slice: live station list
+- Phase 2 opens directly on the station list, then `station/[id]`; mode selection, maps, search, favourites and authentication remain outside this slice.
+- Keep the approved carbon/forest/lime design and native safe areas. Use reusable station cards with explicit zero and unknown counts.
+- Parse untrusted CityBikes fields before rendering. Share a session-memory cache between list and detail with a 60-second freshness window, in-flight request deduplication, a short retry cooldown and a request timeout. No polling or disk persistence in this phase.
+- Manual refresh keeps the previous successful response visible on failure, clearly labelled as cached. Show fetch age separately from the station source timestamp; missing timestamps remain unknown.
+
 **MVP:** Home modes, real API, list + search, station details, bikes/docks counts, loading/error, timestamps.
 **Next:** Map, GPS, favourites, filters.
 **Polish:** animation, accessibility, reduced motion, visual states, responsiveness.

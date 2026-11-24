@@ -1,56 +1,73 @@
-# Welcome to your Expo app 👋
+﻿# RIDE — Velo Antwerpen
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
-## Get started
+## Current feature
 
-1. Install dependencies
+Open RIDE to see Velo Antwerpen stations. Each card shows available bikes, free docks and explicit availability text. Tap a card to open `/station/[id]` with that station's actual counts, street address when provided, coordinates and source update time. Both screens support manual refresh and show loading/error recovery states.
 
-   ```bash
-   npm install
-   ```
+Missing or invalid counts display as unknown, never as zero. Valid zero counts display explicitly. Unreadable station identities and duplicate IDs are omitted with a notice; a wholly invalid response is an error, distinct from an empty station list. Source timestamps are normalized before display.
 
-2. Start the app
+## Run on your phone
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```powershell
+npm install
+npx expo start
+# If local network discovery fails:
+npx expo start --tunnel
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Scan the terminal QR code on your iPhone and open Expo Go. If a project server is already running, use its existing session. Preserve SDK-compatible package versions; use `npx expo install` when adding packages. Do not run the starter reset again.
 
-### Other setup steps
+## Code map
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| File | Responsibility |
+| --- | --- |
+| `src/api/citybikes.ts` | API/station interfaces, validation, HTTPS request, timeout and errors |
+| `src/state/stations.ts` | Shared session cache, request deduplication, refresh transitions and cooldown |
+| `src/hooks/use-stations.ts` | React subscription, initial load and local age-label clock |
+| `src/app/index.tsx` | Station FlatList, stable ID keys, loading/empty states and pull-to-refresh |
+| `src/app/station/[id].tsx` | Resolve route ID against shared real data; detail, missing-station and cold-link states |
+| `src/components/StationCard.tsx` | Reusable station card receiving data and selection callback via props |
+| `src/components/` | Shared availability counts, action buttons, data status, empty/loading messages and attribution |
+| `src/utils/station-display.ts` | Availability and age labels |
+| `src/constants/theme.ts` | Existing palette, typography, spacing, radius and touch-target tokens |
 
-## Learn more
+## Fetching and caching
 
-To learn more about developing your project with Expo, look at the following resources:
+The sole station endpoint is https://api.citybik.es/v2/networks/velo-antwerpen. No API key, custom backend or login is required.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+The in-memory cache is shared across list and detail. Fresh data is reused for 60 seconds. Manual refresh bypasses freshness, with a minimum 15-second request interval and in-flight deduplication to avoid repeated requests. Requests time out after 12 seconds. HTTP 429 honours Retry-After (at least 60 seconds). Local age/cooldown labels update without network requests; there is no polling.
 
-## Join the community
+A failed refresh retains the last successful response and labels it as cached. Fetch time is separate from the source's station timestamp. Detail screens warn when source data is more than five minutes old. Missing source timestamps remain unavailable. Cached data is lost when the process restarts; persistent offline storage is outside this phase.
 
-Join our community of developers creating universal apps.
+[CityBikes API documentation](https://docs.citybik.es/api/v2), [public usage limits](https://docs.citybik.es/api/) and [attribution terms](https://docs.citybik.es/api/tos) were checked on 2026-11-24. The documented public limit is 300 requests/hour. The app includes a visible link to CityBikes. Availability can change; RIDE cannot reserve bikes or docks.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Validation
+
+```powershell
+npm test
+npx tsc --noEmit
+npx expo install --check
+npx expo export --platform ios --platform android --output-dir .expo/phase2-export
+```
+
+Verified on 2026-11-24:
+
+- 16 automated tests passed: malformed/partial responses, missing values, zero bikes/docks, empty responses, timestamp normalization, HTTP/network/JSON/timeout failures, rate-limit cooldown, request deduplication, cache reuse and recovery.
+- UI tests passed for loading/error/empty rendering, zero and unknown counts, cached results, retry and pull-to-refresh callback wiring, station selection, missing IDs and selected-station detail data.
+- Live HTTPS parsing returned 323 stations, zero skipped records and 323 normalized timestamps. Live counts change over time.
+- TypeScript and Expo dependency checks passed; iOS and Android JavaScript/Hermes bundles exported successfully.
+
+Tests use Node's built-in test runner and the existing TypeScript compiler. UI tests render through React Native Web with navigation/safe-area test adapters. They do not establish native gesture behaviour, actual safe-area layout or accessibility performance on a phone. No new testing dependencies were installed.
+
+## Phone verification still required
+
+1. Open Expo Go: confirm the live list loads, scroll to later stations and check notch/home-indicator clearance.
+2. Select several stations, including zero-bike/zero-dock stations when present. Confirm name/counts match the selected card and that address, coordinates and source time appear. Return to the list.
+3. After the 15-second cooldown, pull down to refresh. Existing cards should remain visible while refreshing.
+4. Load stations, disconnect the phone from the internet and refresh. Cached cards should remain with an error and cached-data notice. Restore connectivity and retry after the cooldown. If using Expo Go over a tunnel, cached runtime connectivity may affect this test.
+5. Test an offline first launch, an unknown station ID, large system text and VoiceOver. Check disabled retry states, tap targets and scrolling. Empty/invalid-response states are covered by fixtures; do not rely on the live API becoming empty.
+6. Verify Android separately. These bundle checks do not substitute for a native build or physical-device tests.
+
+Maps, GPS, mode selection, search, favourites, Supabase and authentication remain outside this implementation slice. No commits or pushes were made automatically. See `CHECKLIST.md` for completed and pending assignment work.
