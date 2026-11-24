@@ -146,6 +146,44 @@ test('native pins use real coordinates, mode labels and availability without cus
   assert.match(markers[1].title, /20 docks free/);
 });
 
+test('clusters show only a compact count, retain mode status, and keep selected pins separate', () => {
+  const { Colors } = require('../src/constants/theme.ts');
+  const props = { stations: [stations[0], { ...stations[0], id: 'second' }], mode: 'bikes',
+    selectedId: null, onSelect() {}, initialRegion: ANTWERP_REGION, onRegionChange() {}, focusKey: '' };
+  function cluster(input) {
+    markers = [];
+    render(StationMap, input);
+    assert.equal(markers.length, 1);
+    return markers[0];
+  }
+  const bike = cluster(props);
+  assert.match(bike.accessibilityLabel, /2 stations/);
+  assert.match(bike.title, /24 known bikes/);
+  const badge = renderToStaticMarkup(bike.children);
+  assert.match(badge, />2</);
+  assert.doesNotMatch(badge, /stations/);
+  const badgeStyle = native.StyleSheet.flatten(bike.children.props.style);
+  assert.equal(badgeStyle.minHeight, 44);
+  assert.equal(badgeStyle.minWidth, 44);
+  assert.equal(badgeStyle.backgroundColor, Colors.surface);
+  assert.equal(badgeStyle.borderColor, Colors.accent);
+  const dock = cluster({ ...props, mode: 'docks' });
+  assert.match(dock.title, /0 known docks/);
+  assert.equal(native.StyleSheet.flatten(dock.children.props.style).borderColor, Colors.textSecondary);
+  const unknown = cluster({ ...props, stations: props.stations.map(s => ({ ...s, free_bikes: null })) });
+  assert.match(unknown.title, /2 unknown/);
+  assert.equal(native.StyleSheet.flatten(unknown.children.props.style).borderColor, Colors.text);
+  const closed = cluster({ ...props, stations: props.stations.map(s => ({ ...s, closed: true })) });
+  assert.match(closed.title, /0 known bikes/);
+  markers = [];
+  render(StationMap, { ...props, selectedId: 'a' });
+  const selected = markers.find(pin => pin.identifier === 'a');
+  assert.equal(selected.accessibilityState.selected, true);
+  assert.match(selected.accessibilityLabel, /Selected/);
+  assert.equal(selected.zIndex, 10);
+  assert.deepEqual(selected.coordinate, { latitude: 51.21, longitude: 4.41 });
+});
+
 test('preview shows both real counts and wires details, close and directions', () => {
   let opened = false;
   let closed = false;

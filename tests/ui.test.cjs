@@ -20,6 +20,7 @@ const Detail = require('../src/app/station/[id].tsx').default;
 const { StationCard } = require('../src/components/StationCard.tsx');
 const { DataStatus } = require('../src/components/DataStatus.tsx');
 const { ActionButton } = require('../src/components/ActionButton.tsx');
+const { StationCoordinates, StationTechnicalInfo } = require('../src/components/StationTechnicalInfo.tsx');
 const station = { id: 'a', name: 'Real selected station', latitude: 51.21, longitude: 4.41,
   free_bikes: 0, empty_slots: 0, timestamp: '2026-11-24T12:00:00.000Z', address: 'Selected street', closed: false };
 const reset = (changes = {}) => {
@@ -83,8 +84,10 @@ test('detail resolves selected ID and renders its real location, counts and sour
   const html = render(Detail);
   assert.match(html, /Real selected station/);
   assert.match(html, /Selected street/);
-  assert.match(html, /51.21000/);
-  assert.match(html, /4.41000/);
+  assert.match(html, /Get Directions/);
+  assert.ok(html.indexOf('Get Directions') < html.indexOf('Selected street'));
+  assert.match(html, /Technical information/);
+  assert.doesNotMatch(html, /51.21000|4.41000/); // Coordinates are now deliberately collapsed.
   assert.match(html, /10 min ago/);
   assert.match(html, /Source data is over 5 minutes old/);
   assert.doesNotMatch(html, /Other street/);
@@ -101,10 +104,22 @@ test('detail handles cold links, request failure and missing location/time', () 
   reset({ error: 'Offline' });
   assert.match(render(Detail), /Can’t load this station/);
   reset({ data: data([{ ...station, latitude: null, timestamp: null, address: null }]) });
-  assert.match(render(Detail), /Coordinates unavailable/);
+  assert.match(render(Detail), /Directions unavailable/);
+  assert.match(render(Detail), /Street address unavailable/);
   assert.match(render(Detail), /Update time unavailable/);
   const scroll = Detail().props.children;
   const before = refreshed;
   scroll.props.refreshControl.props.onRefresh();
   assert.equal(refreshed, before + 1);
+});
+
+test('technical information starts collapsed and coordinate content uses selected real data', () => {
+  const html = renderToStaticMarkup(React.createElement(StationTechnicalInfo, { station }));
+  assert.match(html, /aria-expanded="false"/);
+  assert.doesNotMatch(html, /Latitude|Longitude/);
+  const coordinates = value => renderToStaticMarkup(React.createElement(StationCoordinates, { station: value }));
+  assert.match(coordinates(station), /Latitude 51.21000/);
+  assert.match(coordinates(station), /Longitude 4.41000/);
+  assert.match(coordinates({ ...station, latitude: null }), /Coordinates unavailable/);
+  assert.match(coordinates({ ...station, latitude: NaN }), /Coordinates unavailable/);
 });

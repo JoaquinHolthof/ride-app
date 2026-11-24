@@ -12,7 +12,8 @@ export function StationPreview({ station, mode, onOpen, onClose }: {
   return <View style={styles.container}>
     <View style={styles.row}>
       <Text accessibilityRole="header" style={[styles.name, styles.copy]}>{station.name}</Text>
-      <Pressable accessibilityRole="button" accessibilityLabel="Close station preview" onPress={onClose} style={styles.close}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Close station preview" onPress={onClose}
+        style={({ pressed }) => [styles.close, pressed && styles.pressed]}>
         <Text style={styles.closeText}>×</Text>
       </Pressable>
     </View>
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   close: { minHeight: Layout.minTouchTarget, minWidth: Layout.minTouchTarget, justifyContent: 'center', alignItems: 'center' },
   closeText: { fontSize: 28, color: Colors.text },
+  pressed: { opacity: 0.7 },
   copy: { flex: 1 },
   name: { ...Typography.body, fontWeight: '800', color: Colors.text },
   meta: { ...Typography.label, color: Colors.textSecondary },

@@ -1,8 +1,8 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Keyboard, Modal, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Keyboard, Modal, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker } from 'react-native-maps';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors, Layout, Spacing, Typography } from '@/constants/theme';
 import { availability, hasCoordinates, modeStatus } from '@/utils/explore';
 import type { StationMapProps } from './StationMap.types';
 import { clusterAction, clusterStations } from '@/utils/map-clusters';
@@ -23,9 +23,8 @@ function ClusterMarker({ cluster, mode, onPress }: { cluster: StationCluster; mo
     title={`${cluster.stations.length} stations · ${cluster.total} known ${mode}${cluster.unknown ? ` · ${cluster.unknown} unknown` : ''}`}
     accessibilityLabel={`${cluster.stations.length} stations. Zoom in or choose a station.`}
     tracksViewChanges={tracking} stopPropagation onPress={onPress} anchor={{ x: 0.5, y: 0.5 }}>
-    <View style={[styles.cluster, { backgroundColor: color }]} collapsable={false}>
-      <Text style={styles.clusterCount}>{cluster.stations.length}</Text>
-      <Text style={styles.clusterLabel}>stations</Text>
+    <View style={[styles.cluster, { borderColor: color }]} collapsable={false}>
+      <Text style={[styles.clusterCount, { color }]}>{cluster.stations.length}</Text>
     </View>
   </Marker>;
 }
@@ -42,6 +41,7 @@ const darkMap = [
 export const StationMap = memo(function StationMap({ stations, mode, selectedId, onSelect,
   initialRegion, onRegionChange, focusKey, fitOnMount = false, bottomInset = 0 }: StationMapProps) {
   const map = useRef<MapView>(null);
+  const { fontScale } = useWindowDimensions();
   const [ready, setReady] = useState(false);
   const [slow, setSlow] = useState(false);
   const [region, setRegion] = useState(initialRegion);
@@ -87,20 +87,22 @@ export const StationMap = memo(function StationMap({ stations, mode, selectedId,
       onMapReady={() => setReady(true)}>
       {items.map(item => {
         if (item.kind === 'cluster') return <ClusterMarker
-          key={`${item.id}:${mode}:${item.stations.length}:${item.available}:${item.unknown}:${item.total}`}
+          key={`${item.id}:${mode}:${item.stations.length}:${item.available}:${item.unknown}:${item.total}:${fontScale}`}
           cluster={item} mode={mode} onPress={() => openCluster(item)} />;
         const station = item.station;
         const status = availability(station, mode);
         return <Marker key={`${station.id}:${mode}:${status}`} identifier={station.id}
           coordinate={{ latitude: station.latitude, longitude: station.longitude }}
           title={`${station.name} · ${modeStatus(station, mode)}`}
+          accessibilityLabel={`${station.name}. ${modeStatus(station, mode)}${station.id === selectedId ? '. Selected' : ''}`}
+          accessibilityState={{ selected: station.id === selectedId }}
           description="Tap the station preview below for details"
           pinColor={status === 'available' ? Colors.accent : status === 'unknown' ? Colors.text : Colors.textSecondary}
           zIndex={station.id === selectedId ? 10 : 1} tracksViewChanges={false} stopPropagation
           onPress={() => { Keyboard.dismiss(); onSelect(station.id); }} />;
       })}
       {selected && <Circle center={{ latitude: selected.latitude, longitude: selected.longitude }}
-        radius={55} strokeWidth={2} strokeColor={Colors.accent} fillColor="rgba(216,255,106,0.12)" />}
+        radius={55} strokeWidth={3} strokeColor={Colors.accent} fillColor="rgba(216,255,106,0.12)" />}
     </MapView>
     <Modal visible={memberIds !== null} animationType="none" onRequestClose={() => setMemberIds(null)}>
       <SafeAreaView style={styles.memberScreen}>
@@ -121,10 +123,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.surface },
   map: { flex: 1 },
   notice: { position: 'absolute', bottom: 12, left: 12, right: 12, padding: Spacing.md, backgroundColor: Colors.background },
-  cluster: { minWidth: 44, minHeight: 44, padding: Spacing.sm, borderRadius: 22, borderWidth: 2,
-    borderColor: Colors.background, alignItems: 'center', justifyContent: 'center' },
-  clusterCount: { fontSize: 18, lineHeight: 24, fontWeight: '800', color: Colors.onAccent },
-  clusterLabel: { fontSize: 11, lineHeight: 14, fontWeight: '600', color: Colors.onAccent },
+  cluster: { minWidth: Layout.minTouchTarget, minHeight: Layout.minTouchTarget, paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs, borderRadius: 22, borderWidth: 2, backgroundColor: Colors.surface,
+    alignItems: 'center', justifyContent: 'center' },
+  clusterCount: { ...Typography.label, fontWeight: '800' },
   memberScreen: { flex: 1, backgroundColor: Colors.background },
   memberHeader: { padding: Spacing.md, gap: Spacing.md },
   members: { padding: Spacing.md },

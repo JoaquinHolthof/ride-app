@@ -16,7 +16,7 @@ export function MapDataPanel({ feed, unmapped }: { feed: ReturnType<typeof useSt
     : feed.isFetching ? 'Updating…' : feed.data ? `${cached ? 'Cached' : 'Data'} · ${minutes < 1 ? 'just now' : `${minutes}m ago`}` : 'Loading…';
   return <>
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}. Open data, refresh and CityBikes attribution`}
-      onPress={() => setVisible(true)} style={styles.button}>
+      onPress={() => setVisible(true)} style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
       <Text style={styles.label}>{label}</Text>
     </Pressable>
     <Modal visible={visible} animationType="none" onRequestClose={() => setVisible(false)}>
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,
     borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.textSecondary },
   label: { ...Typography.label, color: Colors.text },
+  pressed: { opacity: 0.7 },
   title: { ...Typography.heading, color: Colors.text },
   safeArea: { flex: 1, backgroundColor: Colors.background },
   close: { padding: Spacing.md },

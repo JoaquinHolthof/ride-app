@@ -45,10 +45,10 @@ export function ExploreHeader({ state, dispatch }: Pick<Props, 'state' | 'dispat
     <View style={styles.topline}>
       <View style={styles.brandBlock}><Text accessibilityRole="header" style={styles.brand}>RIDE</Text></View>
       <View style={styles.viewSwitch}><SegmentedControl label="Explore view" value={state.view} onChange={value => dispatch({ type: 'view', value })}
-        options={[{ value: 'map', label: 'Map' }, { value: 'list', label: 'List / Search' }]} /></View>
+        options={[{ value: 'map', label: 'Map' }, { value: 'list', label: 'List', accessibilityLabel: 'List and station search' }]} /></View>
     </View>
     <SegmentedControl label="Find a bike or a dock" value={state.mode} onChange={value => dispatch({ type: 'mode', value })}
-      options={[{ value: 'bikes', label: 'FIND A BIKE' }, { value: 'docks', label: 'FIND A DOCK' }]} />
+      options={[{ value: 'bikes', label: 'Find a bike' }, { value: 'docks', label: 'Find a dock' }]} />
   </View>;
 }
 
@@ -59,13 +59,13 @@ export function ExploreControls({ feed, state, stations, dispatch }: Pick<Props,
         value={state.query} onChangeText={value => dispatch({ type: 'query', value })} style={styles.search}
         autoCorrect={false} autoCapitalize="none" returnKeyType="search" />
       {!!state.query && <Pressable accessibilityRole="button" accessibilityLabel="Clear station search"
-        onPress={() => dispatch({ type: 'query', value: '' })} style={styles.clear}><Text style={styles.clearText}>×</Text></Pressable>}
+        onPress={() => dispatch({ type: 'query', value: '' })} style={({ pressed }) => [styles.clear, pressed && styles.pressed]}><Text style={styles.clearText}>×</Text></Pressable>}
     </View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters} keyboardShouldPersistTaps="handled">
       {([{ value: 'all', label: 'All stations' }, { value: 'available', label: 'Available' },
         { value: 'zero', label: state.mode === 'bikes' ? 'No bikes' : 'No docks' }, { value: 'unknown', label: 'Unknown' }] as const).map(option =>
         <Pressable key={option.value} accessibilityRole="button" accessibilityState={{ selected: state.filter === option.value }}
-          onPress={() => dispatch({ type: 'filter', value: option.value })} style={[styles.filter, state.filter === option.value && styles.activeFilter]}>
+          onPress={() => dispatch({ type: 'filter', value: option.value })} style={({ pressed }) => [styles.filter, state.filter === option.value && styles.activeFilter, pressed && styles.pressed]}>
           <Text style={[styles.filterText, state.filter === option.value && styles.activeFilterText]}>{option.label}</Text>
         </Pressable>)}
     </ScrollView>
@@ -120,11 +120,11 @@ export function ExploreScreen(props: Props) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   controls: { gap: Spacing.sm, paddingBottom: Spacing.md },
-  header: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, gap: Spacing.xs, backgroundColor: Colors.background, flexShrink: 0 },
-  topline: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  brandBlock: { flex: 1 },
-  brand: { ...Typography.heading, color: Colors.accent, fontWeight: '900', fontStyle: 'italic' },
-  viewSwitch: { flex: 2, maxWidth: 240 },
+  header: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, gap: Spacing.xs, backgroundColor: Colors.background, flexShrink: 0 },
+  topline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.sm },
+  brandBlock: { flexGrow: 1, flexShrink: 0 },
+  brand: { ...Typography.heading, fontSize: 28, lineHeight: 32, color: Colors.accent, fontWeight: '900', fontStyle: 'italic' },
+  viewSwitch: { flexGrow: 1, flexShrink: 0, flexBasis: 160, maxWidth: 184 },
   searchRow: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: Radius.sm, alignItems: 'center' },
   search: { ...Typography.label, color: Colors.text, minHeight: Layout.minTouchTarget, flex: 1, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
   clear: { minHeight: Layout.minTouchTarget, minWidth: Layout.minTouchTarget, justifyContent: 'center', alignItems: 'center' },
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   activeFilter: { borderColor: Colors.accent, backgroundColor: Colors.surface },
   filterText: { ...Typography.label, color: Colors.textSecondary },
   activeFilterText: { color: Colors.accent },
+  pressed: { opacity: 0.7 },
   meta: { ...Typography.label, color: Colors.textSecondary },
   list: { flexGrow: 1, padding: Spacing.md, width: '100%', maxWidth: Layout.contentMaxWidth, alignSelf: 'center' },
   separator: { height: Spacing.md },

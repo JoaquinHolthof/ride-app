@@ -77,6 +77,12 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - No backend or auth
 
 ## Priorities
+### Phase 3.2: mobile UI polish
+- Preserve the Phase 3.1 flex map layout, which the user reports now works on iPhone. Compact the branded header and segmented controls without reducing 44 pt targets or disabling text scaling.
+- Keep the current geographical clustering and cluster-to-zoom logic; use count-only, restrained lime badges and retain distinct selection/availability states.
+- Reorder details around the selected Bike/Dock task: station name, large counts, primary Get Directions, address and update time. Put raw coordinates in a collapsed technical section.
+- Follow the existing carbon/forest/lime moodboard. Preserve shared data, cache, offline handling and Expo development tooling; add no dependencies. Validate regressions and both native bundles, with visual/Dynamic Type/VoiceOver checks on iPhone still required.
+
 ### Current implementation slice: Explore map and modes
 - Phase 3.1 corrects confirmed iPhone issues: remove the percentage-height scrolling panels around the map; use a fixed compact header/mode control and a `flex: 1` map viewport. Search/filter UI lives in List. A deliberate bounded preview overlays the map only when selected; full data/refresh/attribution opens in a modal.
 - Reduce pin congestion with a dependency-free, viewport-aware Web Mercator grid clusterer in TypeScript. Cluster badges represent groups, never relocated individual stations. Recompute after completed camera gestures; tap groups to zoom, and offer a member chooser for coincident/very close points. Individual station coordinates and selection remain exact.

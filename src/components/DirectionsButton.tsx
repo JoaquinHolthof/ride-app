@@ -5,11 +5,12 @@ import { Colors, Typography } from '@/constants/theme';
 import { directionsUrl } from '@/utils/explore';
 import { ActionButton } from './ActionButton';
 
-export function DirectionsButton({ station }: { station: Station }) {
+export function DirectionsButton({ station, prominent = false }: { station: Station; prominent?: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const url = directionsUrl(station);
   return <View>
-    <ActionButton label={url ? 'Directions ↗' : 'Directions unavailable'} disabled={!url} variant="secondary" onPress={() => {
+    <ActionButton label={url ? prominent ? 'Get Directions ↗' : 'Directions ↗' : 'Directions unavailable'}
+      disabled={!url} variant={prominent ? 'primary' : 'secondary'} onPress={() => {
       if (!url) return;
       setError(null);
       void Linking.openURL(url).catch(() => setError('Could not open maps. Please try again.'));

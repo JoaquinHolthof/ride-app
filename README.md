@@ -2,11 +2,45 @@
 
 A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
+## Phase 3.2: mobile UI polish — 2026-11-24
+
+The user confirms the Phase 3.1 scrolling correction works on a physical iPhone. This pass preserves that flex layout and refines its hierarchy; the new visual changes have not yet been verified on a device.
+
+- Compact RIDE branding, Map / List tabs and sentence-case Find a bike / Find a dock controls. Less padding gives the map more room. Controls retain 44 pt minimum targets, text scaling and wrapping; the header can wrap at large text sizes. List's accessible name includes station search.
+- Count-only cluster badges use forest fill and a restrained lime outline/numeral, with mint for zero/closed groups and warm white for unknown groups. Numbers mean **station count**, also announced by VoiceOver. Badges are 44 pt minimum rather than the previous two-line badge; text can grow. Existing grid spacing, exact station coordinates, mode totals, viewport culling and cluster zoom/member selection are unchanged. Snapshot tracking stays bounded and is renewed when the font scale changes.
+- Selected pins retain their native availability colour, raised stacking and a stronger selection ring; accessibility labels explicitly announce selection.
+- Details lead with compact back navigation/name, large real counts and a lime **Get Directions** action. Address and source time follow without stacked decorative panels. Raw coordinates live in a collapsed **Technical information** section, which resets for a different station. Refresh, cached/error states, source-age warnings and CityBikes credit remain available.
+- Press feedback now covers search clear, filters, the map data button, preview close and detail controls. Disabled actions use a muted outline treatment and remain non-interactive.
+
+No dependencies, API/cache logic, native configuration or Expo Go development tools changed. No commit or push was created.
+
+**Validation:** `npm test` passes all **39 tests**; `npx tsc --noEmit` and `npx expo install --check` pass; iOS and Android Hermes exports succeed in `.expo/phase32-export`. The 37 prior tests remain, with expectations adapted to the intended labels/collapsed coordinates, plus two regressions covering compact cluster state/selection and technical coordinate content. Existing API/cache, loading/error/empty, filtering/sorting, selection, pull-to-refresh, directions and non-scrolling map checks pass. Rendering tests use adapters and do not prove native appearance, gestures or VoiceOver behaviour.
+
+**Files changed:**
+
+| Area | Files |
+| --- | --- |
+| Explore and map | `src/components/ExploreScreen.tsx`, `SegmentedControl.tsx`, `StationMap.native.tsx`, `StationPreview.tsx`, `MapDataPanel.tsx` |
+| Details and actions | `src/app/station/[id].tsx`, `src/components/DirectionsButton.tsx`, `ActionButton.tsx`, new `StationTechnicalInfo.tsx` |
+| Regression coverage | `tests/explore.test.cjs`, `tests/map-layout.test.cjs`, `tests/ui.test.cjs` |
+| Documentation | `PLAN.md`, `USERFLOW.md`, `CHECKLIST.md`, `README.md` |
+
+**iPhone Expo Go checks:**
+
+1. Reload the existing Expo Go session. If Metro is stopped, run `npx expo start` here and scan its QR code; use `npx expo start --tunnel` if LAN discovery fails. If old UI persists, restart with `--clear` and scan again.
+2. Confirm the compact RIDE / Map / List header and Bike/Dock control stay fixed while the map fills the remaining safe area. Drag on the header, pan/zoom the map and open/close a preview; no header content should scroll beneath the map.
+3. At city zoom, check compact badges display only counts and remain easy to tap. Tap to zoom or choose a member; select a pin and verify its ring, station name and counts. Switch modes and repeat, including zero/unknown/closed examples where available. Check native badge snapshots and smooth gestures with the full network; automated fixtures cover states absent from live data.
+4. Open List, search and filter, then return to Map. Open details from both list and preview; confirm the same station's counts, address and source time. Tap Get Directions and confirm the real destination opens externally without RIDE asking for location permission.
+5. Expand and collapse Technical information; compare coordinates with the selected station. Return to Explore. Check pull-to-refresh, cooldown-disabled controls and pressed feedback. After loading data, disconnect internet and refresh: cached data/error labels must remain; reconnect and retry after the cooldown.
+6. Increase iPhone text size, including accessibility sizes, and test a long station name: no clipped text or inaccessible controls; detail/preview content should remain scrollable. Test VoiceOver tab selection, cluster/pin announcements, primary actions and disclosure expanded/collapsed state. Check notch/home-indicator and map attribution clearance. Leave the blue Expo gear unchanged.
+
+Remaining: these Phase 3.2 device checks, native map performance and separate Android device validation. Optional GPS, favourites, backend/auth and standalone Android Maps configuration remain deferred. Suggested commit after review: `style: refine mobile Explore markers and station details`.
+
 ## Phase 3: Explore map and modes
 
 ### Phase 3.1 — iPhone layout and clustering correction
 
-The user confirmed the app runs in iPhone Expo Go and reported header scrolling/overlap and severe pin congestion. The corrected layout still requires a fresh device check.
+The user confirmed the app runs in iPhone Expo Go and reported header scrolling/overlap and severe pin congestion. In the Phase 3.2 handoff, the user confirmed the scrolling issue is resolved; other device checks below remain applicable.
 
 **Cause:** `ExploreScreen` previously placed a vertical header ScrollView capped at 46% of window height above the map, and another vertical ScrollView capped at 29% below it. The header contained branding, view/mode switches, search, filters, result count and the full refresh/status stack. Those independently scrolling siblings consumed most of the screen while the native map stayed in the middle; scrolling controls disappeared at the map boundary instead of behaving like fixed map controls. The map itself was already outside those ScrollViews. A separate native compositor/z-order defect has not been reproduced, so this is a source-level explanation of the confirmed layout problem, not a claim of diagnosing an iOS rendering bug.
 
@@ -75,7 +109,7 @@ No physical-device checks, commits or pushes were performed in this phase. Sugge
 
 ## Preserved station data and detail functionality
 
-Each station card shows available bikes, free docks and explicit availability text. Tap a card to open `/station/[id]` with that station's actual counts, street address when provided, coordinates and source update time. Both screens support manual refresh and show loading/error recovery states.
+Each station card shows available bikes, free docks and explicit availability text. Tap a card to open `/station/[id]` with that station's actual counts, street address when provided and source update time; expand Technical information for coordinates. Both screens support manual refresh and show loading/error recovery states.
 
 Missing or invalid counts display as unknown, never as zero. Valid zero counts display explicitly. Unreadable station identities and duplicate IDs are omitted with a notice; a wholly invalid response is an error, distinct from an empty station list. Source timestamps are normalized before display.
 
@@ -133,7 +167,7 @@ A failed refresh retains the last successful response and labels it as cached. F
 npm test
 npx tsc --noEmit
 npx expo install --check
-npx expo export --platform ios --platform android --output-dir .expo/phase31-export
+npx expo export --platform ios --platform android --output-dir .expo/phase32-export
 ```
 
 Phase 2 baseline verified on 2026-11-24 (Phase 3 results are above):
@@ -148,7 +182,7 @@ Tests use Node's built-in test runner and the existing TypeScript compiler. UI t
 ## Phone verification still required
 
 1. Open Expo Go: confirm the live list loads, scroll to later stations and check notch/home-indicator clearance.
-2. Select several stations, including zero-bike/zero-dock stations when present. Confirm name/counts match the selected card and that address, coordinates and source time appear. Return to the list.
+2. Select several stations, including zero-bike/zero-dock stations when present. Confirm name/counts match the selected card and that address and source time appear; expand Technical information for coordinates. Return to the list.
 3. After the 15-second cooldown, pull down to refresh. Existing cards should remain visible while refreshing.
 4. Load stations, disconnect the phone from the internet and refresh. Cached cards should remain with an error and cached-data notice. Restore connectivity and retry after the cooldown. If using Expo Go over a tunnel, cached runtime connectivity may affect this test.
 5. Test an offline first launch, an unknown station ID, large system text and VoiceOver. Check disabled retry states, tap targets and scrolling. Empty/invalid-response states are covered by fixtures; do not rely on the live API becoming empty.

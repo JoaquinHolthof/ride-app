@@ -106,6 +106,21 @@ No Git commit or push was created during Phase 3. Web uses the real station list
 
 No new packages, commits or pushes in Phase 3.1. See README for cause, changes, source links and exact device steps.
 
+## Phase 3.2 mobile UI polish — 2026-11-24
+- [x] Record user confirmation that the previous iPhone scrolling issue is resolved; retain the flex map with no outer ScrollView.
+- [x] Compact branding and Map/List/Bike/Dock controls; keep minimum 44 pt targets, safe areas, text scaling and wrapping.
+- [x] Replace two-line cluster badges with count-only forest/lime badges; preserve geographic grouping, zoom/member chooser and mode/availability logic.
+- [x] Strengthen selected-pin ring and accessibility labels; retain bounded marker snapshots, renewed on font-scale changes.
+- [x] Reorder station details around real counts and primary Get Directions; keep address/source time, collapse technical coordinates and reduce whitespace.
+- [x] Add pressed feedback and distinct disabled treatment; preserve search/filter, list/detail, directions, refresh/cache/error states and attribution.
+- [x] All 39 tests pass, including existing regressions and new cluster/technical-information coverage.
+- [x] TypeScript and Expo dependency compatibility checks pass; iOS and Android Hermes exports succeed (`.expo/phase32-export`).
+- [x] Update PLAN, USERFLOW and README with scope, changes, evidence and phone test steps. No new dependencies, development-tool changes, commits or pushes.
+- [ ] Verify the new header and badge appearance on iPhone, with small screens, long names and larger Dynamic Type sizes.
+- [ ] Verify marker tapping, cluster zoom/member chooser, selected ring, preview, native snapshots and performance with 300+ stations.
+- [ ] Verify VoiceOver selection/disclosure announcements, expand/collapse interaction, Get Directions, pressed/disabled states and offline recovery on device.
+- [ ] Repeat native checks on Android; bundle exports and adapter tests do not constitute physical-device verification.
+
 ## Useful commands
 ```powershell
 npx create-expo-app@latest ride-velo-antwerpen

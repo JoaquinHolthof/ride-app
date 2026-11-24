@@ -11,8 +11,9 @@ interface Props {
 export function ActionButton({ label, onPress, disabled = false, variant = 'primary' }: Props) {
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled}
-      onPress={onPress} style={({ pressed }) => [styles.button, variant === 'secondary' && styles.secondary, (pressed || disabled) && styles.dimmed]}>
-      <Text style={[styles.label, variant === 'secondary' && styles.secondaryLabel]}>{label}</Text>
+      onPress={onPress} style={({ pressed }) => [styles.button, variant === 'secondary' && styles.secondary,
+        disabled && styles.disabled, pressed && !disabled && styles.pressed]}>
+      <Text style={[styles.label, variant === 'secondary' && styles.secondaryLabel, disabled && styles.disabledLabel]}>{label}</Text>
     </Pressable>
   );
 }
@@ -20,7 +21,9 @@ export function ActionButton({ label, onPress, disabled = false, variant = 'prim
 const styles = StyleSheet.create({
   button: { minHeight: Layout.minTouchTarget, minWidth: Layout.minTouchTarget, paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm, borderRadius: Radius.sm, backgroundColor: Colors.accent, justifyContent: 'center', alignItems: 'center' },
-  dimmed: { opacity: 0.65 },
+  pressed: { opacity: 0.7 },
+  disabled: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.textSecondary },
+  disabledLabel: { color: Colors.textSecondary },
   secondary: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.textSecondary },
   secondaryLabel: { color: Colors.text },
   label: { ...Typography.label, color: Colors.onAccent, textAlign: 'center' },

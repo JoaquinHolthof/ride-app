@@ -24,9 +24,10 @@ const render = p => renderToStaticMarkup(React.createElement(ExploreScreen, p));
 
 test('map has a non-scrolling flex viewport and fixed header; advanced controls are absent', () => {
   const html = render(props);
-  assert.match(html, /FIND A BIKE/);
-  assert.match(html, /FIND A DOCK/);
-  assert.match(html, /List \/ Search/);
+  assert.match(html, /Find a bike/);
+  assert.match(html, /Find a dock/);
+  assert.match(html, /List and station search/);
+  assert.doesNotMatch(html, /List \/ Search/);
   assert.doesNotMatch(html, /<ride-scroll|<input|Tap a pin|Lime: available/);
   assert.equal(styles.get('explore-map-viewport').flex, 1);
   assert.equal(styles.get('explore-map-viewport').position, undefined);
