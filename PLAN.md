@@ -1,7 +1,7 @@
 # RIDE — Velo Reimagined
 
 ## Assignment
-Minor Visual Code (2026–2027), Option 1: Velo Antwerpen. React Native / Expo. A fresh UI (do not reuse original Velo Antwerpen styling). Every station needs a dedicated details screen showing available bikes and parking spots. No custom backend or mandatory login.
+Minor Visual Code (2026–2027), Option 1: Velo Antwerpen. React Native / Expo. A fresh UI (do not reuse original Velo Antwerpen styling). Every station needs a dedicated details screen showing available bikes and parking spots. Phase 4.1 now authorizes Supabase email login and protected app routes; no custom backend.
 
 ## One-line concept
 **RIDE. — Find a bike. Find a dock. Keep moving.** A two-mode urban mobility app designed around the actual decision a rider needs to make next, not around a default map or list.
@@ -74,9 +74,17 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - AsyncStorage for favourites
 - Optional expo-location permission; never block core usage
 - External navigation link using OS maps
-- No backend or auth
+- Supabase Auth is authorized in Phase 4.1; no custom backend or application database tables yet.
 
 ## Priorities
+### Phase 4.1: email authentication (current scope)
+- The user's explicit Phase 4.1 request supersedes the initial no-auth/no-Supabase restriction for this slice. Use existing Supabase Auth only; no new tables, favourites database, OAuth or custom backend.
+- Preserve the carbon/forest/lime moodboard and existing map layout. Add branded login/signup, confirmation guidance, startup/loading and recoverable error states, plus Account/sign out.
+- Guard Explore, station details and Account with Expo Router protected routes. Restore the session before exposing routes; subscribe to auth changes and clean up listeners. Sign out removes protected navigation history.
+- Use a singleton public-key client, Expo Go-compatible SecureStore persistence on native (chunked for native payload limits), process locking and foreground-only token refresh. Never log credentials, environment values or sessions; web preview uses memory-only sessions.
+- Confirm email in the browser, then return to RIDE to log in; no token-bearing app URLs or OAuth callbacks in this phase. Document the required owned HTTPS confirmation landing page and Supabase email settings.
+- Preserve the installed Supabase version, audit findings and unrelated user changes. Run regression/auth tests, TypeScript, Expo compatibility and native bundle checks; no commits or pushes.
+
 ### Phase 3.2: mobile UI polish
 - Preserve the Phase 3.1 flex map layout, which the user reports now works on iPhone. Compact the branded header and segmented controls without reducing 44 pt targets or disabling text scaling.
 - Keep the current geographical clustering and cluster-to-zoom logic; use count-only, restrained lime badges and retain distinct selection/availability states.

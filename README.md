@@ -2,6 +2,61 @@
 
 A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
+## Phase 4.1: Supabase email authentication — 2026-11-24
+
+This explicitly requested phase supersedes the original no-auth scope. Explore, station details and Account now require a session. After login, the existing CityBikes client/cache, map/clusters, Bike/Dock modes, list/search/filters, directions and offline handling work as before. Tap **RIDE / Account** in the Explore header to sign out on this device. No application tables, favourites database, OAuth or custom backend were added.
+
+### Configuration and persistence
+
+Keep `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` in ignored `.env.local`; `.env.example` contains placeholders only. Restart Metro after environment changes. Startup validates presence, an HTTPS URL and a publishable-key format, without printing values. Missing/invalid configuration shows a branded error instead of opening protected routes. Public variables are embedded in the app bundle: use only the publishable key, never a secret/service-role key or database password.
+
+Native sessions use Expo SecureStore (iOS Keychain / Android Keystore-backed storage), with `WHEN_UNLOCKED_THIS_DEVICE_ONLY` accessibility on iOS and no biometric prompt. The adapter divides large sessions into Unicode-safe chunks under historical native item limits. Every chunk and its manifest is encrypted by SecureStore. A new manifest is published only after all writes succeed; read/write failures are sanitized and partial sessions are never returned. Normal replacement/sign-out removes old chunks. An interrupted cleanup may leave unreachable encrypted chunks; no plaintext session backup is kept. SecureStore can survive an iOS uninstall, so use Sign Out rather than relying on deleting Expo Go to clear a session. [Expo SDK 58 SecureStore documentation](https://docs.expo.dev/versions/v58.0.0/sdk/securestore/).
+
+The shared client persists sessions and disables URL session detection/debug logging. The native provider owns foreground refresh using `startAutoRefresh` / `stopAutoRefresh`, subscribes once to auth changes, and removes its auth/AppState listeners on cleanup. Loading/errors block protected content. A late restore cannot overwrite a newer sign-in/sign-out event. Passwords exist only in the form/request, are cleared after submission and never enter storage or route parameters. Auth errors display curated messages instead of raw responses. Web preview sessions are memory-only and reset on a full reload. [Supabase React Native guide](https://supabase.com/docs/guides/auth/quickstarts/react-native), [refresh lifecycle](https://supabase.com/docs/reference/javascript/auth-startautorefresh).
+
+Expo Router `Stack.Protected` guards Explore, station details and Account and removes their navigation history when the session clears. Login, signup and confirmation guidance are available while signed out. A protected cold link redirects to login; after login this phase opens Explore rather than remembering a deferred destination. These are client navigation guards, not server authorization; future private data will require server-enforced policies. No private data tables exist in this slice. [Protected routes](https://docs.expo.dev/router/advanced/protected/).
+
+### Remaining Supabase dashboard configuration
+
+A read-only request to the configured project's public Auth settings returned HTTP 200: **email enabled, signup enabled, email confirmation required**. No real users were created, no email was sent, and dashboard configuration was not changed.
+
+1. Keep Email/Password enabled and **Confirm email** enabled. Set an appropriate password policy; the app requires at least 8 characters for signup and also respects server rejection of weaker passwords.
+2. In Authentication → URL Configuration, set **Site URL** to a reachable **HTTPS confirmation landing page you control**. The app does not override `emailRedirectTo`, so Supabase uses this Site URL. Keep the standard confirmation email's `{{ .ConfirmationURL }}` link. Confirm in the browser, then manually return to Expo Go and Log In. This phase does not consume callback tokens or automatically open the app. Avoid a third-party landing page: implicit confirmation redirects can carry session tokens in the fragment; the owned page should discard that fragment without logging it or running tracking scripts. Do not leave an unreachable localhost URL for iPhone testing. [Redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
+3. Verify SMTP delivery and sender settings. Supabase's built-in email service is restricted to authorized project-team addresses and currently limited to two messages/hour; configure custom SMTP to test with other addresses. SMTP credentials belong only in Supabase's dashboard, never in this app. [SMTP restrictions and configuration](https://supabase.com/docs/guides/auth/auth-smtp).
+4. Use an email address you control to complete signup, confirmation and login. Check Authentication → Users for confirmation status if troubleshooting. Existing-user signup responses deliberately do not reveal whether an account exists. For an expired confirmation link, retry signup after the email cooldown or handle delivery through the dashboard. Password reset/resend UI is not part of this slice.
+
+### Dependencies and audit
+
+- Added using Expo CLI: `expo-secure-store` **~58.0.3** (included in SDK 58 Expo Go) and `react-native-url-polyfill` **^4.0.0** (JavaScript URL support for Supabase). Expo added the SecureStore config plugin for future native builds; no custom build is needed for Expo Go.
+- `@supabase/supabase-js` was already installed by the user. Its **2.119.2** version is unchanged and now pinned exactly; the lockfile preserves resolved versions. Existing `.agents/`, `skills-lock.json` and the user's prior package installation were preserved.
+- `npm audit` before and after this work reports **3 moderate, 0 high, 0 critical** findings: `minimatch` (globparts amplification / denial of service, [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249)), propagated through `@expo/fingerprint` and `expo`. These are three affected dependency entries, not three distinct advisories. npm's proposed forced fix installs Expo **52.0.49**, so it was not applied. No downgrade or `npm audit fix --force` was run; revisit an SDK-compatible upstream fix later.
+
+### Validation and iPhone handoff
+
+All **56 tests pass** (39 existing + 17 auth tests). Coverage includes restored/loading/error/signed-out routing, auth event races and cleanup, foreground refresh, validation/error sanitization, confirmation vs immediate signup, local sign-out, Unicode/large secure payloads, partial writes and a real installed-SDK integration using mock HTTP responses. Native storage and router rendering use adapters; these tests do not prove Keychain persistence or native navigation on an iPhone. TypeScript and Expo compatibility checks pass. iOS and Android Hermes exports pass in `.expo/phase41-export`. Expo's generated route types were refreshed through a temporary Metro session, which was then stopped. `.env.local` is ignored and untracked; no environment values, credentials or tokens were printed.
+
+1. Finish the dashboard settings above. Run `npx expo start --clear` (or add `--tunnel` for network discovery), scan the QR code and open SDK 58-compatible Expo Go. Expect branded loading followed by Log In on first use.
+2. Try invalid email/short signup password and a wrong login password. Verify readable errors, disabled submission while pending, keyboard behaviour, safe areas, large text and VoiceOver. No protected map/detail screen should flash during restoration.
+3. Sign up with your test address. Expect Check your inbox. Open the email link in the browser, return to RIDE and Log In. Verify Explore loads, then regression-test map pan/zoom/clusters, Bike/Dock counts, list searching/filtering, station details and directions.
+4. Fully close and reopen Expo Go with the device unlocked. Confirm the signed-in session restores. Background and foreground the app; leave it long enough for token refresh and verify it continues working without another login. iOS may retain Keychain data across reinstall; test Sign Out explicitly.
+5. Open RIDE / Account → Sign Out. Confirm Log In appears, Back cannot reopen protected content, and reopening `/station/<real-id>` or `/account` while signed out cannot bypass login. Restart again to confirm the session stays cleared.
+6. After login and loading stations, disconnect internet and refresh the list/map data panel: cached station data should remain labelled. Try auth offline, then reconnect and retry. Restoring an expired session may require connectivity; authentication does not make the existing session-only CityBikes cache survive a cold app restart.
+
+Remaining manual work: email delivery/confirmation, actual login/logout, restart persistence, foreground refresh, protected deep-link/back behaviour, keyboard/accessibility and all native regressions on iPhone (and Android). No physical-device authentication was verified. Google OAuth, password reset, favourites database and production distribution remain deferred. No commit or push was created. Suggested commit: `feat: add secure Supabase email authentication`.
+
+### Phase 4.1 changed files
+
+| Area | Files |
+| --- | --- |
+| Auth infrastructure | `src/auth/config.ts`, `client.ts`, `secure-storage.ts`, `session-storage.native.ts`, `session-storage.ts`, `lifecycle.ts`, `actions.ts`, `AuthProvider.tsx` |
+| Auth UI / routes | `src/components/AuthScreen.tsx`; `src/app/login.tsx`, `signup.tsx`, `confirm-email.tsx`, `account.tsx` |
+| Existing navigation | `src/app/_layout.tsx`, `src/app/index.tsx`, `src/components/ExploreScreen.tsx` |
+| Tests | `tests/auth.test.cjs`, `tests/auth-ui.test.cjs` |
+| Configuration | `.env.example`, `app.json`, `package.json`, `package-lock.json` |
+| Documentation | `AGENTS.md`, `PLAN.md`, `USERFLOW.md`, `CHECKLIST.md`, `README.md` |
+
+The following Phase 2/3 sections are historical implementation records; Phase 4.1 supersedes their earlier statements that authentication is deferred.
+
 ## Phase 3.2: mobile UI polish — 2026-11-24
 
 The user confirms the Phase 3.1 scrolling correction works on a physical iPhone. This pass preserves that flex layout and refines its hierarchy; the new visual changes have not yet been verified on a device.

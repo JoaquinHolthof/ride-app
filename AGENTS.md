@@ -5,7 +5,7 @@ Read `PLAN.md`, `USERFLOW.md`, `MOODBOARD.md`, and `CHECKLIST.md` before modifyi
 ## Project and constraints
 - React Native + Expo + Expo Router + TypeScript, with iOS and Android as primary targets.
 - Public data only from `https://api.citybik.es/v2/networks/velo-antwerpen` (CityBikes API v2).
-- No custom backend, no mandatory login, no Supabase unless the course instructor clarifies a conflicting requirement.
+- Phase 4.1 explicitly authorizes Supabase email authentication and protected Explore/detail/Account routes, superseding the earlier no-auth restriction. Use Supabase Auth only; no custom backend, extra database tables, OAuth or favourites database in this slice.
 - Store saved station IDs locally. Never claim bikes can be reserved.
 - Never commit secrets or private keys. Do not introduce an API key for this public endpoint.
 - Use a distinct visual design, not the official Velo Antwerpen UI.

@@ -24,6 +24,7 @@ interface Props {
   selected: Station | null;
   dispatch: Dispatch<ExploreAction>;
   onOpen: (station: Station) => void;
+  onAccount: () => void;
   onSelect: (id: string) => void;
   region: MapRegion;
   onRegionChange: (region: MapRegion) => void;
@@ -40,10 +41,14 @@ function EmptyResults({ feed, state, dispatch }: Pick<Props, 'feed' | 'state' | 
   return <StateMessage title="No stations to show" description="CityBikes returned an empty list. Refresh to try again." />;
 }
 
-export function ExploreHeader({ state, dispatch }: Pick<Props, 'state' | 'dispatch'>) {
+export function ExploreHeader({ state, dispatch, onAccount }: Pick<Props, 'state' | 'dispatch' | 'onAccount'>) {
   return <View testID="explore-header" style={styles.header}>
     <View style={styles.topline}>
-      <View style={styles.brandBlock}><Text accessibilityRole="header" style={styles.brand}>RIDE</Text></View>
+      <Pressable accessibilityRole="button" accessibilityLabel="RIDE account" accessibilityHint="Open your account and sign out"
+        onPress={onAccount} style={({ pressed }) => [styles.brandBlock, pressed && styles.pressed]}>
+        <Text style={styles.brand}>RIDE</Text>
+        <Text style={styles.accountLabel}>Account</Text>
+      </Pressable>
       <View style={styles.viewSwitch}><SegmentedControl label="Explore view" value={state.view} onChange={value => dispatch({ type: 'view', value })}
         options={[{ value: 'map', label: 'Map' }, { value: 'list', label: 'List', accessibilityLabel: 'List and station search' }]} /></View>
     </View>
@@ -95,7 +100,7 @@ export function ExploreScreen(props: Props) {
   const [previewHeight, setPreviewHeight] = useState(0);
   const filtered = !!state.query.trim() || state.filter !== 'all';
   return <SafeAreaView style={styles.safeArea}>
-    <ExploreHeader state={state} dispatch={dispatch} />
+    <ExploreHeader state={state} dispatch={dispatch} onAccount={props.onAccount} />
     {state.view === 'list' ? <StationList {...props} header={controls} empty={empty} /> :
       <View testID="explore-map-viewport" style={styles.mapArea} onLayout={event => setMapHeight(event.nativeEvent.layout.height)}>
         {stations.length > 0 ? <StationMap stations={stations} mode={state.mode} selectedId={selected?.id ?? null}
@@ -122,7 +127,9 @@ const styles = StyleSheet.create({
   controls: { gap: Spacing.sm, paddingBottom: Spacing.md },
   header: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, gap: Spacing.xs, backgroundColor: Colors.background, flexShrink: 0 },
   topline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.sm },
-  brandBlock: { flexGrow: 1, flexShrink: 0 },
+  brandBlock: { flexGrow: 1, flexShrink: 0, minHeight: Layout.minTouchTarget, minWidth: Layout.minTouchTarget,
+    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
+  accountLabel: { ...Typography.label, color: Colors.textSecondary },
   brand: { ...Typography.heading, fontSize: 28, lineHeight: 32, color: Colors.accent, fontWeight: '900', fontStyle: 'italic' },
   viewSwitch: { flexGrow: 1, flexShrink: 0, flexBasis: 160, maxWidth: 184 },
   searchRow: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: Radius.sm, alignItems: 'center' },

@@ -121,6 +121,23 @@ No new packages, commits or pushes in Phase 3.1. See README for cause, changes, 
 - [ ] Verify VoiceOver selection/disclosure announcements, expand/collapse interaction, Get Directions, pressed/disabled states and offline recovery on device.
 - [ ] Repeat native checks on Android; bundle exports and adapter tests do not constitute physical-device verification.
 
+## Phase 4.1 Supabase email authentication — 2026-11-24
+- [x] Apply the user's explicit auth scope, superseding the initial no-auth restriction; read guidance and verify official Supabase/SDK 58 docs.
+- [x] Validate both public environment variables without printing values; reject secret/service-role credentials; keep `.env.local` ignored and untracked.
+- [x] Shared client, native SecureStore adapter for large/Unicode payloads, serialized atomic manifest updates, sanitized failures and no plaintext persistence.
+- [x] Branded login/signup, loading, confirmation guidance, auth errors and Account/sign-out screens; keyboard-aware scrolling, safe areas and 44 pt buttons.
+- [x] Restore sessions before route access, subscribe to auth events, prevent stale restoration races, manage foreground refresh and clean up listeners.
+- [x] Guard Explore, station details and Account with Expo Router; signed-out users cannot navigate into those routes. Existing app functionality remains behind login.
+- [x] Read-only public Auth settings check: HTTP 200, email/signup enabled, confirmation required. No live test accounts/emails or dashboard changes.
+- [x] All 56 tests pass, including 17 focused auth/storage/navigation tests and an installed-SDK integration against mock HTTP responses.
+- [x] TypeScript and Expo dependency compatibility pass; iOS/Android Hermes exports pass.
+- [x] Record unchanged audit findings: 3 moderate, 0 high/critical; do not apply the proposed Expo downgrade.
+- [x] Document changes, install additions, dashboard/email settings and iPhone instructions. No tables, OAuth, favourites database, commits or pushes.
+- [ ] Verify owned HTTPS Site URL, confirmation email template and SMTP/delivery settings in Supabase Dashboard.
+- [ ] Complete real email signup/confirmation/login and failure cases on iPhone Expo Go.
+- [ ] Verify secure persistence across force-close/reopen, foreground refresh, sign-out/restart, protected deep links and cleared back history on device.
+- [ ] Check keyboard, Dynamic Type, VoiceOver, offline recovery and the full CityBikes map/list/detail flow on iPhone and Android.
+
 ## Useful commands
 ```powershell
 npx create-expo-app@latest ride-velo-antwerpen

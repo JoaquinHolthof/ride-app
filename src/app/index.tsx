@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import type { Station } from '@/api/citybikes';
@@ -29,5 +29,6 @@ export default function HomeScreen() {
     router.push({ pathname: '/station/[id]', params: { id: station.id, mode: state.mode } });
   }, [state.mode]);
   return <ExploreScreen feed={feed} state={state} stations={stations} selected={selected} dispatch={dispatch}
-    onOpen={onOpen} onSelect={onSelect} region={region.current} onRegionChange={onRegionChange} height={height} />;
+    onOpen={onOpen} onSelect={onSelect} onAccount={() => router.push('/account')}
+    region={region.current} onRegionChange={onRegionChange} height={height} />;
 }

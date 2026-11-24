@@ -1,5 +1,14 @@
 # RIDE — Userflow
 
+## Phase 4.1 entry and authentication
+Launch → branded session restoration → signed in: Explore; signed out: Log In. Protected Explore, station and Account links cannot bypass restoration or login.
+
+Log In ↔ Sign Up → submit email/password once → if confirmation is required, show neutral email guidance → open the email confirmation link in the browser → return to RIDE and log in. No password or email is placed in route parameters. If confirmation is disabled in Supabase, a returned session opens Explore directly.
+
+Explore → tap RIDE account shortcut → Account → sign out on this device → Log In, with protected history removed. Failed sign out shows a retryable error. Backgrounding stops automatic token refresh; foregrounding resumes it. Restoration failures block protected screens and offer retry.
+
+The original bike/dock flows below remain available after authentication. This explicit Phase 4.1 scope supersedes the earlier no-auth plan; no favourites database or OAuth is added.
+
 ```mermaid
 flowchart TD
  A[Open RIDE] --> B{What do you need?}
