@@ -38,7 +38,7 @@ Status: [x] drafted / [ ] requires work or physical verification. Mark complete 
 - [x] Show name, free bikes and empty slots; include loading, error/retry and pull-to-refresh (automated state/wiring checks; native gesture verification pending).
 - [x] Provide a separate station detail route with bike and parking counts from the selected station.
 - [x] Explain where fetch, state and list live in the project (README).
-- [ ] Implement the two-mode RIDE flow; search and list fallback.
+- [x] Implement the two-mode RIDE flow; name search, availability filters and list fallback (automated checks; phone verification below).
 
 ## Phase 5: Optional extra + review (Lesson 07 pp. 35–59)
 - [ ] Add local favourites with persistence on phone; test after a restart.
@@ -68,6 +68,43 @@ Status: [x] drafted / [ ] requires work or physical verification. Mark complete 
 - [ ] Verify Android device behaviour. Bundle success is not physical-device validation.
 
 The automated UI tests render through React Native Web and inspect event wiring; they do not simulate iOS/Android touch gestures or safe-area insets. Session cache does not persist after process termination. No commits or pushes were made in this phase.
+
+## Phase 3 implementation validation — 2026-11-24
+- [x] Re-read project guidance, inspect the cache/UI/tests, and update implementation plan before coding.
+- [x] Verify SDK 58 map compatibility in official Expo docs and installed SDK metadata; install `react-native-maps` 1.29.11 using `npx expo install`.
+- [x] Real native cartography: default Apple Maps on iOS / Google Maps on Android, pins at validated API coordinates, selected-station preview and existing detail navigation.
+- [x] Find a bike / Find a dock changes sorting, primary counts, availability filtering and marker labels/colours. Unknown, zero and closed remain distinct.
+- [x] Local station-name search, All / Available / Zero / Unknown filters, empty-search recovery, Map / List switch and list pull-to-refresh.
+- [x] Preserve shared API/cache, error recovery, cached-data labels, CityBikes attribution and detail information.
+- [x] Native pins without custom marker children; memoized map and sorted results; virtualized list. No new API polling.
+- [x] Directions use actual destination coordinates, handle missing coordinates/open failures, and request no RIDE location permission.
+- [x] `npm test`: all 27 tests pass, including 11 new Explore/model/native-marker-adapter tests.
+- [x] TypeScript and Expo dependency checks pass; iOS and Android Hermes exports succeed.
+- [ ] Physically verify iPhone Expo Go: map tiles, pan/zoom, marker selection, modes, search/filter, preview, detail/back navigation, directions, safe areas and large text.
+- [ ] Check VoiceOver and native marker touch accessibility; list remains the full accessible alternative.
+- [ ] Verify offline map/list fallback, recovery and performance with the live 300+ station network on iOS/Android.
+- [ ] Native map performance is not established by mocked marker tests or successful bundles.
+- [ ] Browser visual preview: unavailable because the computer-use browser host could not be reached. Browser UI states are covered by automated rendering tests only.
+- [ ] Figma concept comparison: MCP Starter-plan call limit blocked reading frames. Supplied moodboard and existing tokens used; no pixel-match claim.
+- [ ] Optional locate-me and permission-denial UI remain deferred; the app currently requests no location permission and never invents a user position.
+- [ ] Android standalone/store Maps API configuration remains a later distribution task. Expo Go requires no app key; no secrets were added.
+
+No Git commit or push was created during Phase 3. Web uses the real station list and an explicit native-map availability message, never a schematic map substitute.
+
+## Phase 3.1 iPhone layout correction — 2026-11-24
+- [x] Record user-confirmed iPhone Expo Go run and reported header/map overlap and overcrowding. No device screenshot was supplied or found locally.
+- [x] Replace percentage-height scrolling map header/footer with fixed compact controls and a flex map viewport; move search/filters to List.
+- [x] Keep only deliberate map overlays: compact data access and a bounded selected-station preview, with native map padding for the preview.
+- [x] Add dependency-free viewport/zoom clustering, exact individual coordinates, selected-pin separation and close/coincident member selection.
+- [x] Live initial-view check: 323 stations represented by 40 markers (34 clusters + 6 pins), approximately 1.3ms grouping on development machine.
+- [x] Preserve Bike/Dock modes, search/filters, station details, directions, refresh/cache/error behaviour and attribution.
+- [x] Investigate blue gear: no RIDE component; Expo native source uses a blue circular gear in its floating Tools window. Development tools unchanged. Exact screenshot comparison remains unavailable.
+- [x] All 37 automated tests, TypeScript and Expo dependency checks pass; iOS/Android Hermes bundle exports pass.
+- [ ] Retest corrected layout on iPhone: no header scrolling under map, safe areas, Dynamic Type, preview interactions and map gestures.
+- [ ] Verify native cluster badge snapshots, zoom expansion, selection, VoiceOver and frame rate; automated tests do not establish native rendering performance.
+- [ ] Confirm reported gear opens Expo Tools on the user's device; no production build was inspected.
+
+No new packages, commits or pushes in Phase 3.1. See README for cause, changes, source links and exact device steps.
 
 ## Useful commands
 ```powershell

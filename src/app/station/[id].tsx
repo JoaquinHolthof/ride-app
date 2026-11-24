@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActionButton } from '@/components/ActionButton';
+import { DirectionsButton } from '@/components/DirectionsButton';
 import { AvailabilityCount } from '@/components/AvailabilityCount';
 import { DataStatus } from '@/components/DataStatus';
 import { SourceCredit } from '@/components/SourceCredit';
@@ -11,7 +12,8 @@ import { useStations } from '@/hooks/use-stations';
 import { ageLabel, stationStatus } from '@/utils/station-display';
 
 export default function StationDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string | string[] }>();
+  const { id, mode } = useLocalSearchParams<{ id: string | string[]; mode?: string }>();
+  const selectedMode = mode === 'docks' ? 'docks' : 'bikes';
   const feed = useStations();
   const station = typeof id === 'string' ? feed.data?.stations.find(item => item.id === id) : undefined;
   const updatedAt = station?.timestamp ? Date.parse(station.timestamp) : null;
@@ -27,8 +29,8 @@ export default function StationDetailScreen() {
           <Text accessibilityRole="header" style={styles.heading}>{station.name}</Text>
           <View style={styles.panel}>
             <View style={styles.counts}>
-              <AvailabilityCount value={station.free_bikes} label="Bikes available" />
-              <AvailabilityCount value={station.empty_slots} label="Docks free" />
+              <AvailabilityCount value={station.free_bikes} label="Bikes available" highlighted={selectedMode === 'bikes' && !station.closed} />
+              <AvailabilityCount value={station.empty_slots} label="Docks free" highlighted={selectedMode === 'docks' && !station.closed} />
             </View>
             <Text style={styles.body}>{stationStatus(station)}</Text>
           </View>
@@ -41,6 +43,7 @@ export default function StationDetailScreen() {
                 ? `Latitude ${station.latitude.toFixed(5)}\nLongitude ${station.longitude.toFixed(5)}`
                 : 'Coordinates unavailable'}
             </Text>
+            <DirectionsButton station={station} />
           </View>
           <View style={styles.panel}>
             <Text accessibilityRole="header" style={styles.label}>Station last updated</Text>

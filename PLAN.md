@@ -77,8 +77,18 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - No backend or auth
 
 ## Priorities
-### Current implementation slice: live station list
-- Phase 2 opens directly on the station list, then `station/[id]`; mode selection, maps, search, favourites and authentication remain outside this slice.
+### Current implementation slice: Explore map and modes
+- Phase 3.1 corrects confirmed iPhone issues: remove the percentage-height scrolling panels around the map; use a fixed compact header/mode control and a `flex: 1` map viewport. Search/filter UI lives in List. A deliberate bounded preview overlays the map only when selected; full data/refresh/attribution opens in a modal.
+- Reduce pin congestion with a dependency-free, viewport-aware Web Mercator grid clusterer in TypeScript. Cluster badges represent groups, never relocated individual stations. Recompute after completed camera gestures; tap groups to zoom, and offer a member chooser for coincident/very close points. Individual station coordinates and selection remain exact.
+- Keep selected stations outside their cluster with native pin/ring emphasis. Avoid hundreds of custom React marker children; only the much smaller set of cluster badges uses custom views. Count labels remain in native station callouts and the selected preview to avoid new label collisions.
+- Investigate the reported blue gear separately from app layout. Do not change Expo development settings; document evidence and any unverified screenshot identification.
+- Phase 3 opens Explore with explicit Find a bike / Find a dock controls, a real native map, and a retained list alternative. Both share the existing API cache and detail route.
+- Sort by selected-mode availability descending; zero, unknown and closed stations remain distinguishable. Search station names and filter All / Available / Zero / Unknown locally without extra requests.
+- Use Expo SDK 58's supported `react-native-maps` version, installed with Expo CLI. Default Apple Maps on iOS and Google Maps on Android work in Expo Go without app API keys. Standalone Android distribution requires Google Maps configuration later.
+- Use native pins rather than hundreds of custom React marker views. Keep map gestures uncontrolled, memoize station derivations, and update marker appearance only when data/mode/selection changes.
+- A selected pin opens a compact station preview with real counts and access to the existing details. Filtered-out or removed selections clear safely. External directions use real destination coordinates and do not require RIDE location access.
+- No in-app location request or locate-me feature in this slice; no assumed user position. Persistent favourites, backend and auth remain deferred.
+- Retain the moodboard's bold typography, dark surfaces and lime emphasis. Figma concept inspection was attempted but blocked by the account's MCP call limit; no pixel-match claim is made.
 - Keep the approved carbon/forest/lime design and native safe areas. Use reusable station cards with explicit zero and unknown counts.
 - Parse untrusted CityBikes fields before rendering. Share a session-memory cache between list and detail with a 60-second freshness window, in-flight request deduplication, a short retry cooldown and a request timeout. No polling or disk persistence in this phase.
 - Manual refresh keeps the previous successful response visible on failure, clearly labelled as cached. Show fetch age separately from the station source timestamp; missing timestamps remain unknown.

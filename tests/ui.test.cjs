@@ -14,6 +14,8 @@ mocks.set('expo-router', { useLocalSearchParams: () => ({ id: selectedId }), rou
   push: route => { navigated = route; }, canGoBack: () => false, replace: () => {}, back: () => {},
 } });
 const Home = require('../src/app/index.tsx').default;
+const { StationList } = require('../src/components/ExploreScreen.tsx');
+const { initialExploreState } = require('../src/utils/explore.ts');
 const Detail = require('../src/app/station/[id].tsx').default;
 const { StationCard } = require('../src/components/StationCard.tsx');
 const { DataStatus } = require('../src/components/DataStatus.tsx');
@@ -48,7 +50,9 @@ test('station card renders real zero counts, unknown counts and closed status', 
 
 test('FlatList uses station IDs and wires selection and pull-to-refresh', async () => {
   reset({ data: data(), isFetching: true });
-  const list = Home().props.children;
+  const list = StationList({ stations: feed.data.stations, state: { ...initialExploreState, view: 'list' }, feed,
+    onOpen: item => { navigated = { pathname: '/station/[id]', params: { id: item.id } }; },
+    header: React.createElement(native.View), empty: React.createElement(native.View) });
   assert.equal(list.type, native.FlatList);
   assert.equal(list.props.keyExtractor(station), station.id);
   assert.equal(list.props.refreshing, true);
