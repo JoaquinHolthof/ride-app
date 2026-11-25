@@ -2,6 +2,37 @@
 
 A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
+## Phase 4.2: email redirects and Google OAuth — 2026-11-25
+
+Implemented the native `rideapp://auth/callback` flow, Supabase PKCE session exchange, a RIDE-styled **Continue with Google** button on login/signup, safe callback errors and duplicate handling. Existing email/password login, SecureStore session handling, protected routes and all CityBikes features remain in place. The existing `rideapp` scheme in `app.json` is unchanged. No backend/tables, remote settings, native builds, commits or pushes were created.
+
+**Manual setup is still required.** Follow [the exact Supabase/Google dashboard settings, landing-page hosting steps and iOS development-build commands](docs/AUTH_SETUP.md). Google sign-in is implemented but not yet tested against a live provider or on a physical device. The user's Phase 4.1 iPhone success is recorded; it is not evidence of Phase 4.2 OAuth success.
+
+- **Expo Go:** email signup/login and existing app flows remain available. Host [the supplied static confirmation page](docs/auth-confirmation/index.html) and replace Supabase's localhost Site URL with its actual HTTPS URL. Optionally set `EXPO_PUBLIC_AUTH_EMAIL_REDIRECT_URL` to that allowlisted URL and restart Metro; an omitted override preserves Supabase's Site URL fallback, while an invalid override shows a configuration error. The localhost problem remains until the dashboard is configured. Confirmation returns to the page; manually reopen RIDE and log in. Google is disabled with an explanation.
+- **Development/production native build:** new signup and Google return to `rideapp://auth/callback`. The app exchanges a one-use code using the verifier stored in SecureStore. Cold/warm native intents strip codes before creating Router navigation state. Browser and Router callbacks share bounded in-memory deduplication; expired/used/missing-verifier links offer password login or a new flow. An existing signed-in account is not replaced by a stray link.
+- **Required dashboards:** create a Google **Web application** OAuth client whose redirect URI is the Supabase provider panel's HTTPS callback; enable Google in Supabase and put its Client ID/Secret there only. Add `rideapp://auth/callback` and the actual HTTPS landing URL to Supabase Redirect URLs. Keep Confirm email enabled and the template's `{{ .ConfirmationURL }}` link.
+- **Dependency:** added `expo-crypto` **~58.0.8** with `npx expo install expo-crypto`, resolved to **58.0.8**. Existing `expo-web-browser`, `expo-constants`, Router and Supabase **2.119.2** are reused. Native secure randomness and SHA-256 prevent the SDK's plain-PKCE fallback. No Google native SDK, `expo-auth-session` or development-client package was added; Supabase owns the OAuth request and PKCE exchange.
+
+Expo's documentation requires a development build for app-scheme OAuth; inclusion of WebBrowser/Crypto in Expo Go does not change this. [Expo authentication](https://docs.expo.dev/guides/authentication/), [SDK 58 Crypto](https://docs.expo.dev/versions/v58.0.0/sdk/crypto/), [Supabase PKCE](https://supabase.com/docs/guides/auth/sessions/pkce-flow).
+
+### Phase 4.2 exact file manifest
+
+| Area | Changed or added files |
+| --- | --- |
+| Auth | `src/auth/actions.ts`, `src/auth/AuthProvider.tsx`, `src/auth/client.ts`, `src/auth/redirects.ts`, `src/auth/callbacks.ts`, `src/auth/callback-inbox.ts`, `src/auth/oauth.ts`, `src/auth/runtime.ts`, `src/auth/pkce-crypto.ts`, `src/auth/pkce-crypto.native.ts` |
+| UI and navigation | `src/components/AuthScreen.tsx`, `src/app/_layout.tsx`, `src/app/confirm-email.tsx`, `src/app/+native-intent.tsx`, `src/app/auth/callback.tsx` |
+| Tests | `tests/auth-redirects.test.cjs`, `tests/auth-ui.test.cjs` |
+| Configuration | `.env.example`, `package.json`, `package-lock.json` |
+| Documentation and hosting artifact | `AGENTS.md`, `PLAN.md`, `USERFLOW.md`, `CHECKLIST.md`, `README.md`, `docs/AUTH_SETUP.md`, `docs/auth-confirmation/index.html` |
+
+### Phase 4.2 validation
+
+All **71 tests pass** (56 existing + 15 new), including installed-SDK S256 generation, secure verifier persistence across restart and callback exchange. `npx tsc --noEmit`, `npx expo install --check` and `git diff --check` pass. iOS and Android Hermes exports succeed in `.expo/phase42-export`. Native exports compile JavaScript/Hermes bundles; they are not signed native builds or device tests. Phone checks and failure/recovery scenarios are in [AUTH_SETUP.md](docs/AUTH_SETUP.md#phone-acceptance-checks). The install audit still reports 3 moderate findings inherited through Expo tooling; no forced fix/downgrade was applied. No live credentials, tokens or confirmation URLs were added to source.
+
+Suggested commit after review: `feat: add PKCE email callbacks and Supabase Google sign-in`.
+
+The Phase 4.1 and earlier sections below are historical records. Phase 4.2 supersedes their statements about deferred OAuth, no callback processing and Site-URL-only signup.
+
 ## Phase 4.1: Supabase email authentication — 2026-11-24
 
 This explicitly requested phase supersedes the original no-auth scope. Explore, station details and Account now require a session. After login, the existing CityBikes client/cache, map/clusters, Bike/Dock modes, list/search/filters, directions and offline handling work as before. Tap **RIDE / Account** in the Explore header to sign out on this device. No application tables, favourites database, OAuth or custom backend were added.

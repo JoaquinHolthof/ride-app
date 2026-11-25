@@ -19,12 +19,14 @@ export function authError(error: unknown): string {
   }
 }
 type Auth = Pick<SupabaseClient['auth'], 'signUp' | 'signInWithPassword' | 'signOut'>;
-export async function submitCredentials(auth: Auth, mode: 'login' | 'signup', email: string, password: string) {
+export async function submitCredentials(auth: Auth, mode: 'login' | 'signup', email: string, password: string, emailRedirectTo?: string) {
   const invalid = credentialsError(email, password, mode === 'signup');
   if (invalid) return { error: invalid, confirmation: false };
   try {
     const input = { email: email.trim(), password }; // Passwords are never trimmed or stored by RIDE.
-    const { data, error } = mode === 'signup' ? await auth.signUp(input) : await auth.signInWithPassword(input);
+    const { data, error } = mode === 'signup'
+      ? await auth.signUp({ ...input, ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}) })
+      : await auth.signInWithPassword(input);
     if (error) return { error: authError(error), confirmation: false };
     return { error: null, confirmation: mode === 'signup' && !data.session };
   } catch { return { error: authError(null), confirmation: false }; }

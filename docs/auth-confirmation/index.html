@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>RIDE — Email confirmation</title>
+  <script>
+    (() => {
+      const query = new URLSearchParams(location.search);
+      const fragment = new URLSearchParams(location.hash.slice(1));
+      const failed = ['error', 'error_code'].some(key => query.has(key) || fragment.has(key));
+      // Never store, display, forward or exchange callback credentials on this page.
+      history.replaceState(null, '', location.pathname);
+      document.addEventListener('DOMContentLoaded', () => {
+        if (failed) {
+          document.getElementById('title').textContent = 'Check your confirmation link';
+          document.getElementById('message').textContent = 'This link could not be completed. It may be expired or already used. Return to RIDE and try logging in if you already confirmed your email. Otherwise use your latest email or try signing up again after a few minutes.';
+        }
+      });
+    })();
+  </script>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101512; color: #faf8ee; }
+    body { margin: 0; padding: 32px 24px; }
+    main { max-width: 480px; margin: 8vh auto; }
+    .brand { color: #d8ff6a; font-weight: 900; font-size: 64px; font-style: italic; margin: 0; }
+    h1 { font-size: 32px; line-height: 1.15; }
+    p { font-size: 18px; line-height: 1.6; }
+    .secondary { color: #a5b5a6; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">RIDE</p>
+    <h1 id="title">Return to RIDE</h1>
+    <p id="message">If you just confirmed your email with Supabase, return to RIDE and log in with your email and password.</p>
+    <p class="secondary">Expo Go does not reopen automatically. This page does not sign you in or verify account status.</p>
+    <noscript>Close this browser tab after confirming your email and return to RIDE to log in.</noscript>
+  </main>
+</body>
+</html>

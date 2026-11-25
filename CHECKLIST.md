@@ -138,6 +138,25 @@ No new packages, commits or pushes in Phase 3.1. See README for cause, changes, 
 - [ ] Verify secure persistence across force-close/reopen, foreground refresh, sign-out/restart, protected deep links and cleared back history on device.
 - [ ] Check keyboard, Dynamic Type, VoiceOver, offline recovery and the full CityBikes map/list/detail flow on iPhone and Android.
 
+## Phase 4.2 email redirects and Google OAuth — 2026-11-25
+- [x] Record user-confirmed Phase 4.1 iPhone email/signup/login, confirmation, secure persistence, protected routes and working map/details. Remaining Phase 4.1 device checkboxes above are historical, not a denial of that confirmation.
+- [x] Read project guidance, audit auth/client/routes/storage/dependencies, retain approved moodboard, and update PLAN/USERFLOW before implementation.
+- [x] Verify current official Supabase PKCE/mobile/Google/redirect docs and exact SDK 58 WebBrowser/Crypto docs; preserve existing `rideapp` scheme.
+- [x] Native PKCE email redirect, callback parsing, error/recovery states, cold/warm native-intent sanitization, shared duplicate processing and existing-session protection.
+- [x] RIDE-styled Google action, system auth browser, Supabase code exchange, cancellation/provider-failure handling; Expo Go/web OAuth blocked with guidance.
+- [x] Secure native PKCE randomness/SHA-256 using Expo Crypto; existing SecureStore adapter, auth lifecycle, email/password login and route guards retained.
+- [x] Explicit Expo Go HTTPS signup redirect configuration and supplied static landing artifact; no LAN addresses, fake deployment or disabled email confirmation.
+- [x] Document precise Google Cloud/Supabase settings, hosting requirements, same-installation/latest-link limits and iOS build prerequisites/commands without executing builds.
+- [x] `npm test`: **71 passing tests** (56 existing + 15 new), covering OAuth request/cancel/error paths, strict callback parsing, cold/warm intent sanitization, duplicate/conflicting callbacks, email redirect regression, hosted-page credential removal and installed-SDK S256 exchange through secure persistence across restart.
+- [x] `npx tsc --noEmit`, `npx expo install --check` and `git diff --check` pass. `expo-crypto` ~58.0.8 is the only added dependency; no unrelated package updates.
+- [x] iOS and Android JavaScript/Hermes exports succeed in `.expo/phase42-export`; signed native build/device verification remains pending below.
+- [ ] Host `docs/auth-confirmation/index.html`, configure owned HTTPS Site URL/allowlist/environment, and verify new email confirmation in Expo Go.
+- [ ] Configure Google Web OAuth client and Supabase provider/redirect allowlist manually; keep secrets solely in dashboards.
+- [ ] Create/install iOS development build and verify cold/warm callbacks, Google success/cancel/errors, email regressions, restart persistence, protected routes and CityBikes flows.
+- [ ] Verify native behaviour/appearance/accessibility on Android as well. No physical-device Phase 4.2 verification claimed.
+
+No tables, favourites database, remote configuration changes, native builds, commits or pushes were created.
+
 ## Useful commands
 ```powershell
 npx create-expo-app@latest ride-velo-antwerpen

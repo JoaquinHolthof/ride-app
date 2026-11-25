@@ -48,5 +48,6 @@ export function AuthNavigator() {
           <Stack.Screen name="station/[id]" options={{ title: 'Station details' }} />
           <Stack.Screen name="account" options={{ title: 'Account' }} />
         </Stack.Protected>
+        <Stack.Screen name="auth/callback" options={{ title: 'Complete sign-in' }} />
       </Stack>;
 }

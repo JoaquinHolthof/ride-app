@@ -35,7 +35,7 @@ export function AuthStartup({ error, onRetry }: { error?: string | null; onRetry
 }
 
 export function CredentialForm({ mode }: { mode: 'login' | 'signup' }) {
-  const { submit } = useAuth();
+  const { submit, google, googleAvailabilityMessage } = useAuth();
   const signup = mode === 'signup';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,6 +43,17 @@ export function CredentialForm({ mode }: { mode: 'login' | 'signup' }) {
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const passwordInput = useRef<ComponentRef<typeof TextInput>>(null);
+  const sendGoogle = async () => {
+    if (submitting.current) return;
+    submitting.current = true;
+    setBusy(true);
+    setError(null);
+    setPassword('');
+    try {
+      const result = await google();
+      if (result.status !== 'success') setError(result.message);
+    } finally { submitting.current = false; setBusy(false); }
+  };
   const send = async () => {
     if (submitting.current) return;
     submitting.current = true;
@@ -73,6 +84,10 @@ export function CredentialForm({ mode }: { mode: 'login' | 'signup' }) {
       {error && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.text}>{error}</Text>}
       {busy && <ActivityIndicator accessibilityLabel={signup ? 'Creating account' : 'Logging in'} color={Colors.accent} />}
       <ActionButton label={busy ? 'Please wait…' : signup ? 'Sign Up' : 'Log In'} disabled={busy} onPress={() => { void send(); }} />
+      <Text style={styles.muted}>Or continue with your Google account</Text>
+      <ActionButton label="Continue with Google" variant="secondary" disabled={busy || Boolean(googleAvailabilityMessage)}
+        onPress={() => { void sendGoogle(); }} />
+      {googleAvailabilityMessage && <Text style={styles.muted}>{googleAvailabilityMessage}</Text>}
       <ActionButton label={signup ? 'Already registered? Log In' : 'New to RIDE? Sign Up'} variant="secondary" disabled={busy}
         onPress={() => router.replace(signup ? '/login' : '/signup')} />
       {!signup && <ActionButton label="Need to confirm your email?" variant="secondary" disabled={busy}

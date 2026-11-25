@@ -35,10 +35,12 @@ test('root declares all existing routes protected and removes them on sign out',
   setState({ status: 'ready', session: null, error: null });
   let html = render(AuthNavigator);
   assert.match(html, /name="login"/); assert.match(html, /name="signup"/); assert.match(html, /name="confirm-email"/);
+  assert.match(html, /name="auth\/callback"/);
   assert.doesNotMatch(html, /name="index"|name="station\/\[id\]"|name="account"/);
   setState({ status: 'ready', session: { user: { id: 'fixture' } }, error: null });
   html = render(AuthNavigator);
   assert.match(html, /name="index"/); assert.match(html, /name="station\/\[id\]"/); assert.match(html, /name="account"/);
+  assert.match(html, /name="auth\/callback"/);
   assert.doesNotMatch(html, /name="login"|name="signup"|name="confirm-email"/);
   setState({ status: 'ready', session: null, error: null });
   assert.doesNotMatch(render(AuthNavigator), /name="account"|name="index"/);
@@ -47,6 +49,7 @@ test('auth forms expose email/password fields and confirmation guidance without 
   setState({ status: 'ready', session: null, error: null });
   const login = render(CredentialForm, { mode: 'login' });
   assert.match(login, /Email address/); assert.match(login, /type="password"/); assert.match(login, /Log In/);
+  assert.match(login, /Continue with Google/);
   assert.match(render(CredentialForm, { mode: 'signup' }), /at least 8 characters/);
   const confirmation = render(Confirm);
   assert.match(confirmation, /Check your inbox/); assert.match(confirmation, /return here and log in/);
@@ -62,4 +65,14 @@ test('Explore account shortcut preserves compact header and calls its navigation
   const style = native.StyleSheet.flatten(account.props.style({ pressed: false }));
   assert.ok(style.minHeight >= 44 && style.minWidth >= 44);
   account.props.onPress(); assert.equal(opened, true);
+});
+
+test('Expo Go Google button explains the development-build requirement alongside email login', () => {
+  setState({ status: 'ready', session: null, error: null });
+  context.googleAvailabilityMessage = 'Google sign-in needs a RIDE development build. Use email and password in Expo Go.';
+  const html = render(CredentialForm, { mode: 'login' });
+  assert.match(html, /development build/);
+  assert.match(html, /Email address/);
+  assert.match(html, /Continue with Google/);
+  assert.match(html, /aria-disabled="true"/);
 });

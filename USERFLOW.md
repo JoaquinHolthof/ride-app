@@ -1,5 +1,15 @@
 # RIDE — Userflow
 
+## Phase 4.2 redirects and Google
+
+Development/production build: Sign Up → confirmation email → Supabase verifies email → `rideapp://auth/callback` → exchange the one-use PKCE code using this installation's secure verifier → existing session listener → Explore. Cold and warm app callbacks share processing. Invalid/expired/already-used links show recovery; an already confirmed user can log in with email/password. Confirmation on another device may verify the email but cannot exchange this installation's verifier.
+
+Expo Go: Sign Up → owned HTTPS confirmation landing page → manually return to RIDE → Log In. Google button explains that a development build is required. No temporary Expo Go address is used for authentication.
+
+Log In / Sign Up → Continue with Google → system authentication browser → Google → Supabase HTTPS callback → RIDE scheme callback → PKCE exchange → Explore. Cancel stays signed out with a neutral message; provider/network failures offer another attempt or email login. Starting a newer signup/OAuth flow replaces the previous PKCE verifier; use the latest link.
+
+The Phase 4.1 flow below is historical; Phase 4.2 supersedes its no-OAuth/no-callback scope. Approved moodboard and all bike/dock flows remain unchanged.
+
 ## Phase 4.1 entry and authentication
 Launch → branded session restoration → signed in: Explore; signed out: Log In. Protected Explore, station and Account links cannot bypass restoration or login.
 

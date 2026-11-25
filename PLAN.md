@@ -77,6 +77,13 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - Supabase Auth is authorized in Phase 4.1; no custom backend or application database tables yet.
 
 ## Priorities
+### Phase 4.2: email redirects and Google OAuth (current scope)
+- The explicit Phase 4.2 request authorizes Google via Supabase Auth. No application tables, favourites database or custom backend.
+- Preserve the approved carbon/forest/lime moodboard, email/password flow, secure storage, protected routes and all CityBikes features. User confirms Phase 4.1 email auth, persistence and map/details on a physical iPhone.
+- Keep the existing stable `rideapp` scheme. Use `rideapp://auth/callback` in development/production builds, PKCE code exchange and a callback route reachable regardless of session. Sanitize incoming navigation, deduplicate exchanges and show safe recovery for expired/invalid links.
+- Expo Go retains email/password and manual login after browser confirmation. Document an owned HTTPS landing page and explicit redirect configuration; do not invent a deployment or use temporary LAN URLs. Google OAuth requires a development build.
+- Reuse supported Expo browser/linking libraries; verify secure PKCE crypto on native. Add tests, TypeScript/dependency checks and native bundle exports. Dashboard setup and native builds remain manual; no automatic commits or pushes.
+
 ### Phase 4.1: email authentication (current scope)
 - The user's explicit Phase 4.1 request supersedes the initial no-auth/no-Supabase restriction for this slice. Use existing Supabase Auth only; no new tables, favourites database, OAuth or custom backend.
 - Preserve the carbon/forest/lime moodboard and existing map layout. Add branded login/signup, confirmation guidance, startup/loading and recoverable error states, plus Account/sign out.

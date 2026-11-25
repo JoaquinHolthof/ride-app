@@ -14,6 +14,7 @@ export const supabase = config.error ? null : createClient(config.url!, config.k
     // Native refresh is owned by the provider's AppState lifecycle, including initial state.
     autoRefreshToken: Platform.OS === 'web',
     detectSessionInUrl: false,
+    flowType: 'pkce',
     lock: processLock,
     debug: false,
   },

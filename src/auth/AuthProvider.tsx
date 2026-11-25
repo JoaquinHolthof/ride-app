@@ -5,6 +5,8 @@ import { configurationError, supabase } from './client';
 import { initialAuthState, observeAuth } from './lifecycle';
 import type { AuthState } from './lifecycle';
 import { signOutLocally, submitCredentials } from './actions';
+import { googleAvailabilityMessage, signInWithGoogle, signupRedirect } from './runtime';
+import { ensurePkceCrypto } from './pkce-crypto';
 
 interface AuthContextValue {
   state: AuthState;
@@ -12,6 +14,8 @@ interface AuthContextValue {
   retry: () => void;
   submit: (mode: 'login' | 'signup', email: string, password: string) => Promise<{ error: string | null; confirmation: boolean }>;
   signOut: () => Promise<string | null>;
+  google: typeof signInWithGoogle;
+  googleAvailabilityMessage: string | null;
 }
 const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -24,8 +28,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const value: AuthContextValue = {
     state, configurationError,
     retry: () => { setState(initialAuthState); setAttempt(value => value + 1); },
-    submit: (mode, email, password) => supabase ? submitCredentials(supabase.auth, mode, email, password)
-      : Promise.resolve({ error: 'Authentication is not configured.', confirmation: false }),
+    submit: async (mode, email, password) => {
+      if (!supabase) return { error: 'Authentication is not configured.', confirmation: false };
+      if (mode === 'signup') {
+        if (signupRedirect.error) return { error: signupRedirect.error, confirmation: false };
+        try { ensurePkceCrypto(); }
+        catch { return { error: 'Secure authentication is unavailable. Restart RIDE and try again.', confirmation: false }; }
+      }
+      return submitCredentials(supabase.auth, mode, email, password, signupRedirect.url);
+    },
+    google: signInWithGoogle,
+    googleAvailabilityMessage,
     signOut: () => supabase ? signOutLocally(supabase.auth) : Promise.resolve('Authentication is not configured.'),
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
