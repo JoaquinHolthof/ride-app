@@ -7,6 +7,7 @@ import { DataStatus } from '@/components/DataStatus';
 import { SourceCredit } from '@/components/SourceCredit';
 import { StateMessage } from '@/components/StateMessage';
 import { StationTechnicalInfo } from '@/components/StationTechnicalInfo';
+import { SaveStationButton } from '@/components/SaveStationButton';
 import { Colors, Layout, Radius, Spacing, Typography } from '@/constants/theme';
 import { useStations } from '@/hooks/use-stations';
 import { ageLabel, stationStatus } from '@/utils/station-display';
@@ -40,6 +41,7 @@ export default function StationDetailScreen() {
             <Text style={styles.status}>{stationStatus(station)}</Text>
           </View>
           <DirectionsButton station={station} prominent />
+          <SaveStationButton stationId={station.id} />
           <View style={styles.information}>
             <Text accessibilityRole="header" style={styles.label}>Address</Text>
             <Text style={styles.status}>{station.address ?? 'Street address unavailable'}</Text>

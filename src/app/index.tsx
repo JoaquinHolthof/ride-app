@@ -30,5 +30,6 @@ export default function HomeScreen() {
   }, [state.mode]);
   return <ExploreScreen feed={feed} state={state} stations={stations} selected={selected} dispatch={dispatch}
     onOpen={onOpen} onSelect={onSelect} onAccount={() => router.push('/account')}
+    onSaved={() => router.push({ pathname: '/saved', params: { mode: state.mode } })}
     region={region.current} onRegionChange={onRegionChange} height={height} />;
 }

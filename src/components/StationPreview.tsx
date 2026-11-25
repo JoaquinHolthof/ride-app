@@ -5,6 +5,7 @@ import { modeCount, modeStatus } from '@/utils/explore';
 import type { RideMode } from '@/utils/explore';
 import { ActionButton } from './ActionButton';
 import { DirectionsButton } from './DirectionsButton';
+import { SaveStationButton } from './SaveStationButton';
 
 export function StationPreview({ station, mode, onOpen, onClose }: {
   station: Station; mode: RideMode; onOpen: () => void; onClose: () => void;
@@ -30,6 +31,7 @@ export function StationPreview({ station, mode, onOpen, onClose }: {
       <View style={styles.copy}><ActionButton label="Station details →" onPress={onOpen} /></View>
       <View style={styles.copy}><DirectionsButton station={station} /></View>
     </View>
+    <SaveStationButton stationId={station.id} />
   </View>;
 }
 const styles = StyleSheet.create({

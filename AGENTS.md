@@ -5,8 +5,8 @@ Read `PLAN.md`, `USERFLOW.md`, `MOODBOARD.md`, and `CHECKLIST.md` before modifyi
 ## Project and constraints
 - React Native + Expo + Expo Router + TypeScript, with iOS and Android as primary targets.
 - Public data only from `https://api.citybik.es/v2/networks/velo-antwerpen` (CityBikes API v2).
-- Phase 4.2 explicitly authorizes Supabase email authentication, mobile callbacks and Google OAuth with protected Explore/detail/Account routes. Use Supabase Auth only; no custom backend, extra database tables or favourites database in this slice.
-- Store saved station IDs locally. Never claim bikes can be reserved.
+- Phase 4.3 authorizes Supabase Auth and the per-user `public.favourites` table with ownership RLS and protected Explore/detail/Account/Saved routes. No other application tables or custom backend. Deliver version-controlled SQL; do not execute remote SQL automatically.
+- Store favourite station IDs with their authenticated owner's UUID in Supabase. Keep private client caches account-scoped and clear them on sign-out. Never claim bikes can be reserved.
 - Never commit secrets or private keys. Do not introduce an API key for this public endpoint.
 - Use a distinct visual design, not the official Velo Antwerpen UI.
 - Each station must open a dedicated detail screen showing `free_bikes` and `empty_slots`.
@@ -34,7 +34,7 @@ Read `PLAN.md`, `USERFLOW.md`, `MOODBOARD.md`, and `CHECKLIST.md` before modifyi
 5. Implement one dynamic detail route for every station.
 6. Implement distinct Find a bike / Find a dock user flows, filtering and search.
 7. Add map/GPS only if compatible with Expo Go; list-based flow must remain usable without permissions.
-8. Add local favourites and test persistence after restart.
+8. Add account-scoped Supabase favourites under Phase 4.3 and test persistence after restart and isolation across account switches.
 9. Validate on phone, run TypeScript/test/build checks and create meaningful commits after working features.
 10. Prepare README, visual documentation, presentation, demo video and source ZIP without `node_modules`.
 

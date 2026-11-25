@@ -2,6 +2,35 @@
 
 A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
+## Phase 4.3: Supabase Saved stations — 2026-11-25
+
+Authenticated users can **Save/Unsave** from a station's details or selected map preview and open the protected **Saved** screen from Explore. Saved IDs are stored in Supabase; live bikes/docks come from the existing CityBikes cache. Zero counts stay zero, missing stations remain removable, and loading/empty/error/offline states offer recovery. Failed writes retain confirmed state, never queue offline or claim success.
+
+**Manual database setup required:** apply [the migration](supabase/migrations/20261125162038_create_user_favourites.sql) once using the [exact SQL Editor instructions](docs/FAVOURITES_SETUP.md). No remote SQL was executed. The table has `user_id uuid`, `station_id text`, a composite primary key preventing duplicate user/station pairs, an auth-user foreign key, enabled/forced RLS, and separate authenticated-only SELECT/INSERT/DELETE ownership policies using `auth.uid()`. Anonymous access and UPDATE/TRUNCATE privileges are revoked. The mobile app continues to use its publishable key and user JWT, never an admin/service key.
+
+Private client state is scoped to the authenticated UUID and discarded on sign-out/account switch before rendering another account. Outstanding requests are aborted and stale completions ignored. Favourites refresh on sign-in, Saved entry, foreground and manual retry; same-account offline results remain available only while the process/session survives. There is no private disk cache, Realtime subscription or offline write queue. Existing auth, maps/clusters, Bike/Dock, search, station details, directions and public cache remain intact.
+
+### Setup and phone handoff
+
+- Read [FAVOURITES_SETUP.md](docs/FAVOURITES_SETUP.md) for preflight/schema checks, SQL Editor application, Data API settings and a two-account attack matrix.
+- After reviewing that guide, manually run `node --env-file=.env.local scripts/verify-favourites-rls.cjs` with two confirmed email/password test accounts. It uses hidden password prompts and ordinary user JWTs, tests reads/forged inserts/deletes in both directions, and cleans up its temporary rows. **It was not run remotely.** `npm test` never invokes it.
+- On a phone, run `npx expo start --clear`, log in as A, save from preview/details, verify counts in Saved, restart online, then switch to B and confirm isolation. Test offline refresh/write failures and all existing map/auth flows. Full steps are in the setup guide; no Phase 4.3 device verification is claimed.
+- Added only **`@electric-sql/pglite` 0.6.0** as an exact development dependency for local Postgres policy tests, installed via Expo CLI. It is not imported by the app and adds no native runtime requirement. No remote provider/distribution configuration was changed.
+
+### Phase 4.3 file manifest
+
+| Area | Changed/added files |
+| --- | --- |
+| Database / manual verification | `supabase/migrations/20261125162038_create_user_favourites.sql`, `scripts/verify-favourites-rls.cjs`, `docs/FAVOURITES_SETUP.md` |
+| Private data/state | `src/favourites/api.ts`, `src/favourites/store.ts`, `src/favourites/context.ts`, `src/favourites/FavouritesProvider.tsx`, `src/hooks/use-favourites.ts` |
+| UI/navigation | `src/app/_layout.tsx`, `src/app/index.tsx`, `src/app/saved.tsx`, `src/app/station/[id].tsx`, `src/components/ExploreScreen.tsx`, `src/components/StationPreview.tsx`, `src/components/SaveStationButton.tsx`, `src/components/SavedScreen.tsx` |
+| Tests | `tests/favourites.test.cjs`, `tests/favourites-rls.test.cjs`, `tests/favourites-ui.test.cjs`, `tests/favourites-ui-adapter.cjs`, `tests/auth-ui.test.cjs`, `tests/explore.test.cjs`, `tests/map-layout.test.cjs`, `tests/ui.test.cjs` |
+| Configuration/planning | `package.json`, `package-lock.json`, `AGENTS.md`, `PLAN.md`, `USERFLOW.md`, `CHECKLIST.md`, `README.md` |
+
+**Validation:** all **93 tests pass** (71 existing + 22 new, including nested Postgres checks), TypeScript and Expo dependency checks pass, the manual script passes syntax checking, and iOS/Android Hermes exports succeed in `.expo/phase43-export`. Local Postgres fixtures verify the actual migration and RLS but do not establish hosted-project or physical-device success. The package install still reports 3 moderate findings inherited through Expo tooling; no forced upgrade/downgrade was applied. No commit or push was made. Suggested commit after review: `feat: add user-scoped saved stations with Supabase RLS`.
+
+The sections below are historical. Phase 4.3 supersedes earlier local-only/no-favourites-database statements.
+
 ## Phase 4.2: email redirects and Google OAuth — 2026-11-25
 
 Implemented the native `rideapp://auth/callback` flow, Supabase PKCE session exchange, a RIDE-styled **Continue with Google** button on login/signup, safe callback errors and duplicate handling. Existing email/password login, SecureStore session handling, protected routes and all CityBikes features remain in place. The existing `rideapp` scheme in `app.json` is unchanged. No backend/tables, remote settings, native builds, commits or pushes were created.

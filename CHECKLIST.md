@@ -157,6 +157,22 @@ No new packages, commits or pushes in Phase 3.1. See README for cause, changes, 
 
 No tables, favourites database, remote configuration changes, native builds, commits or pushes were created.
 
+## Phase 4.3 Supabase Saved stations and RLS — 2026-11-25
+- [x] Read planning/auth/station architecture and both Supabase skills; preserve approved moodboard and update current scope before coding.
+- [x] CLI-created migration `supabase/migrations/20261125162038_create_user_favourites.sql`: owner UUID + station ID, composite primary key, auth-user cascade, nonblank-ID constraint, enabled/forced RLS, separate ownership SELECT/INSERT/DELETE policies and least-privilege grants.
+- [x] API separates Supabase calls/parsing from UI, verifies expected user, paginates without relying on server row caps, acknowledges writes, handles duplicates without UPDATE and sanitizes errors.
+- [x] Per-account in-memory store, immediate keyed account boundary, request cancellation and late-response rejection; no disk cache, offline queue or private data shared across users.
+- [x] Save/Unsave in details/selected previews; protected Saved route and Explore shortcut; live/zero/unknown counts from existing CityBikes cache, removable missing IDs, loading/empty/stale/error states and pull-to-refresh.
+- [x] Deliver SQL Editor preflight/application/readback instructions and a manual two-account JWT test script with temporary rows/cleanup. Neither remote SQL nor the hosted test script was run.
+- [x] **93 tests pass** (71 existing + 22 new, including nested Postgres checks): actual migration/RLS/grants, two simulated account roles, duplicate/FK constraints, API validation/pagination, cancelled/stale requests, account-boundary and Saved UI states.
+- [x] `npx tsc --noEmit`, `npx expo install --check`, manual-script syntax check and `git diff --check` pass.
+- [x] iOS and Android JavaScript/Hermes exports pass in `.expo/phase43-export`. These are bundle checks, not signed native builds or device verification.
+- [ ] Owner manually applies migration and verifies Data API exposure, policies, constraints and grants in the intended project.
+- [ ] Run hosted two-account SELECT/INSERT/DELETE attacks and own-write/duplicate/anonymous tests with dedicated confirmed accounts.
+- [ ] On iPhone/Android, verify save/unsave across preview/details/Saved, online restart persistence, account switching during requests, offline failure/recovery, missing station IDs, accessibility and map/auth regressions.
+
+Only test tooling was added (`@electric-sql/pglite` 0.6.0 dev dependency). No runtime/native dependencies, hosted database changes, commits or pushes.
+
 ## Useful commands
 ```powershell
 npx create-expo-app@latest ride-velo-antwerpen

@@ -1,4 +1,5 @@
 const { mocks } = require('./register.cjs');
+require('./favourites-ui-adapter.cjs');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const React = require('react');
@@ -36,14 +37,16 @@ test('root declares all existing routes protected and removes them on sign out',
   let html = render(AuthNavigator);
   assert.match(html, /name="login"/); assert.match(html, /name="signup"/); assert.match(html, /name="confirm-email"/);
   assert.match(html, /name="auth\/callback"/);
+  assert.doesNotMatch(html, /name="saved"/);
   assert.doesNotMatch(html, /name="index"|name="station\/\[id\]"|name="account"/);
   setState({ status: 'ready', session: { user: { id: 'fixture' } }, error: null });
   html = render(AuthNavigator);
   assert.match(html, /name="index"/); assert.match(html, /name="station\/\[id\]"/); assert.match(html, /name="account"/);
+  assert.match(html, /name="saved"/);
   assert.match(html, /name="auth\/callback"/);
   assert.doesNotMatch(html, /name="login"|name="signup"|name="confirm-email"/);
   setState({ status: 'ready', session: null, error: null });
-  assert.doesNotMatch(render(AuthNavigator), /name="account"|name="index"/);
+  assert.doesNotMatch(render(AuthNavigator), /name="account"|name="index"|name="saved"/);
 });
 test('auth forms expose email/password fields and confirmation guidance without sensitive route parameters', () => {
   setState({ status: 'ready', session: null, error: null });

@@ -1,4 +1,5 @@
 const { mocks } = require('./register.cjs');
+require('./favourites-ui-adapter.cjs');
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const React = require('react');

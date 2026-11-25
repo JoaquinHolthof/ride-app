@@ -5,6 +5,7 @@ import { Colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/auth/AuthProvider';
 import { authAccess } from '@/auth/lifecycle';
 import { AuthStartup } from '@/components/AuthScreen';
+import { FavouritesProvider } from '@/favourites/FavouritesProvider';
 
 const rideTheme = {
   ...DarkTheme,
@@ -22,7 +23,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={rideTheme}>
       <StatusBar style="light" />
-      <AuthProvider><AuthNavigator /></AuthProvider>
+      <AuthProvider><FavouritesProvider><AuthNavigator /></FavouritesProvider></AuthProvider>
     </ThemeProvider>
   );
 }
@@ -47,6 +48,7 @@ export function AuthNavigator() {
           <Stack.Screen name="index" options={{ title: 'RIDE' }} />
           <Stack.Screen name="station/[id]" options={{ title: 'Station details' }} />
           <Stack.Screen name="account" options={{ title: 'Account' }} />
+          <Stack.Screen name="saved" options={{ title: 'Saved stations' }} />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" options={{ title: 'Complete sign-in' }} />
       </Stack>;

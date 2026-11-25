@@ -1,5 +1,15 @@
 # RIDE — Userflow
 
+## Phase 4.3 Saved stations
+
+Sign in → fresh account-scoped Saved load → Explore. Station detail or selected map preview → Save station → wait for server acknowledgement → Saved state everywhere. Tap Unsave → successful delete → remove from Saved. Failed/offline writes keep the last confirmed state and offer retry; there is no background write queue.
+
+Explore → Saved → current user's saved IDs joined with the shared CityBikes cache → station detail. Pull-to-refresh reloads both Saved IDs and station counts (respecting CityBikes cooldown). Missing station records remain removable with unavailable-count guidance. Empty Saved offers Explore; first-load failure offers retry; failed refresh retains only this user's previously loaded IDs with a stale/offline message.
+
+Sign out/account switch → discard private in-memory Saved state before rendering another account → fresh load for the new user. Slow old-account requests cannot populate the new account. After a cold offline launch, show an error/retry rather than inventing an empty Saved list. Supabase persists favourites across online restarts; the phone keeps no disk copy in this phase.
+
+Earlier local-only favourites plans are superseded by this explicitly authorized phase. Existing authentication, map, Bike/Dock, search, details and directions remain unchanged.
+
 ## Phase 4.2 redirects and Google
 
 Development/production build: Sign Up → confirmation email → Supabase verifies email → `rideapp://auth/callback` → exchange the one-use PKCE code using this installation's secure verifier → existing session listener → Explore. Cold and warm app callbacks share processing. Invalid/expired/already-used links show recovery; an already confirmed user can log in with email/password. Confirmation on another device may verify the email but cannot exchange this installation's verifier.
