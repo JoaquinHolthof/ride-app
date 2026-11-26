@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Station } from '@/api/citybikes';
 import type { useStations } from '@/hooks/use-stations';
@@ -8,7 +8,7 @@ import { Colors, Layout, Radius, Spacing, Typography } from '@/constants/theme';
 import type { RideMode } from '@/utils/explore';
 import { ActionButton } from './ActionButton';
 import { DataStatus } from './DataStatus';
-import { SaveStationButton } from './SaveStationButton';
+import { SaveStationButton, SaveStationFeedback } from './SaveStationButton';
 import { SourceCredit } from './SourceCredit';
 import { StateMessage } from './StateMessage';
 import { StationCard } from './StationCard';
@@ -28,39 +28,42 @@ export function SavedScreen({ favourites, feed, mode, onExplore, onOpen }: Props
     ? <StateMessage loading={!favourites.error} title={favourites.error ? 'Can’t load saved stations' : 'Loading your saved stations'}
       description={favourites.error ? 'Connect to the internet and retry. Your saved list has not been loaded on this device.' : 'Getting the stations saved to your account…'} />
     : <StateMessage title="No saved stations yet" description="Save a station from its preview or details to find it here." />;
-  return <SafeAreaView style={styles.safeArea}>
+  return <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
     <FlatList data={favourites.ids ?? EMPTY_IDS} keyExtractor={id => id}
       contentContainerStyle={styles.content} initialNumToRender={8} maxToRenderPerBatch={8} windowSize={7}
       refreshing={favourites.isFetching || feed.isFetching} onRefresh={() => { void refresh(); }}
       ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
       ListHeaderComponent={<View style={styles.header}>
-        <ActionButton label="Back to Explore" variant="secondary" onPress={onExplore} />
         <Text style={styles.eyebrow}>RIDE · YOUR STATIONS</Text>
         <Text accessibilityRole="header" style={styles.heading}>Saved</Text>
-        <Text style={styles.text}>Your regular stops. Current bikes and free docks.</Text>
-        {favourites.ids !== null && <Text style={styles.muted}>{favourites.ids.length} saved stations</Text>}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={[styles.muted, { flex: 1 }]}>{favourites.ids === null ? 'Your regular stops' : favourites.ids.length + ' saved stations'}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={favourites.error ? 'Retry saved stations' : 'Refresh saved stations'}
+            disabled={favourites.isFetching || favourites.pendingId !== null}
+            accessibilityState={{ disabled: favourites.isFetching || favourites.pendingId !== null, busy: favourites.isFetching }}
+            onPress={() => { void favourites.refresh(); }} style={({ pressed }) => [{ minHeight: 44, minWidth: 44, justifyContent: 'center', paddingHorizontal: 8 }, pressed && { opacity: 0.6 }]}>
+            <Text style={styles.muted}>{favourites.isFetching ? 'Syncing…' : favourites.error ? 'Retry' : 'Refresh'}</Text>
+          </Pressable>
+        </View>
         {favourites.error && <>
           <Text accessibilityRole="alert" style={styles.text}>{favourites.error}</Text>
           {favourites.ids !== null && <Text style={styles.muted}>Showing your last synced saved list. Reconnect and refresh before changing it.</Text>}
         </>}
-        <ActionButton label={favourites.isFetching ? 'Syncing saved stations…' : favourites.error ? 'Retry saved stations' : 'Refresh saved stations'}
-          variant="secondary" disabled={favourites.isFetching || favourites.pendingId !== null}
-          onPress={() => { void favourites.refresh(); }} />
         <DataStatus {...feed} compact />
       </View>}
       renderItem={({ item: id }) => {
         const station = stations.get(id);
         return <View style={styles.row}>
-          {station ? <StationCard station={station} mode={mode} onPress={() => onOpen(station)} />
+          {station ? <StationCard station={station} mode={mode} bookmark={<SaveStationButton stationId={id} stationName={station.name} />} onPress={() => onOpen(station)} />
             : <View style={styles.unavailable}>
-              <Text accessibilityRole="header" style={styles.text}>Saved station unavailable</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}><Text accessibilityRole="header" style={[styles.text, { flex: 1 }]}>Saved station unavailable</Text><SaveStationButton stationId={id} /></View>
               <Text style={styles.muted}>{feed.data ? 'This station is not in the current CityBikes list.' : 'Station information has not loaded. Connect and refresh for bike and dock counts.'}</Text>
               <Text style={styles.muted}>Station ID: {id}</Text>
             </View>}
-          <SaveStationButton stationId={id} />
+          <SaveStationFeedback stationId={id} />
         </View>;
       }}
-      ListEmptyComponent={empty} ListFooterComponent={<SourceCredit />} />
+      ListEmptyComponent={<View>{empty}{favourites.ids?.length === 0 && <ActionButton label="Explore stations" onPress={onExplore} />}</View>} ListFooterComponent={<SourceCredit />} />
   </SafeAreaView>;
 }
 const styles = StyleSheet.create({

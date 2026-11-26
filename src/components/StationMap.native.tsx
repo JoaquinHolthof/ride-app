@@ -20,8 +20,8 @@ function ClusterMarker({ cluster, mode, onPress }: { cluster: StationCluster; mo
   }, []);
   const color = cluster.available > 0 ? Colors.accent : cluster.unknown > 0 ? Colors.text : Colors.textSecondary;
   return <Marker identifier={cluster.id} coordinate={{ latitude: cluster.latitude, longitude: cluster.longitude }}
-    title={`${cluster.stations.length} stations · ${cluster.total} known ${mode}${cluster.unknown ? ` · ${cluster.unknown} unknown` : ''}`}
-    accessibilityLabel={`${cluster.stations.length} stations. Zoom in or choose a station.`}
+    accessibilityLabel={`${cluster.stations.length} stations. ${cluster.total} known ${mode}${cluster.unknown ? ` · ${cluster.unknown} unknown` : ''}. Zoom in or choose a station.`}
+    accessibilityRole="button"
     tracksViewChanges={tracking} stopPropagation onPress={onPress} anchor={{ x: 0.5, y: 0.5 }}>
     <View style={[styles.cluster, { borderColor: color }]} collapsable={false}>
       <Text style={[styles.clusterCount, { color }]}>{cluster.stations.length}</Text>
@@ -93,10 +93,8 @@ export const StationMap = memo(function StationMap({ stations, mode, selectedId,
         const status = availability(station, mode);
         return <Marker key={`${station.id}:${mode}:${status}`} identifier={station.id}
           coordinate={{ latitude: station.latitude, longitude: station.longitude }}
-          title={`${station.name} · ${modeStatus(station, mode)}`}
           accessibilityLabel={`${station.name}. ${modeStatus(station, mode)}${station.id === selectedId ? '. Selected' : ''}`}
           accessibilityState={{ selected: station.id === selectedId }}
-          description="Tap the station preview below for details"
           pinColor={status === 'available' ? Colors.accent : status === 'unknown' ? Colors.text : Colors.textSecondary}
           zIndex={station.id === selectedId ? 10 : 1} tracksViewChanges={false} stopPropagation
           onPress={() => { Keyboard.dismiss(); onSelect(station.id); }} />;

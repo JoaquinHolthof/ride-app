@@ -14,7 +14,7 @@ mocks.set('react-native', { ...native, FlatList: props => {
     props.ListFooterComponent);
 } });
 const { SavedScreen } = require('../src/components/SavedScreen.tsx');
-const { SaveStationButton } = require('../src/components/SaveStationButton.tsx');
+const { SaveStationButton, SaveStationFeedback } = require('../src/components/SaveStationButton.tsx');
 const { StationPreview } = require('../src/components/StationPreview.tsx');
 const { ExploreHeader } = require('../src/components/ExploreScreen.tsx');
 const { initialExploreState } = require('../src/utils/explore.ts');
@@ -35,7 +35,7 @@ const render = (patch = {}) => renderToStaticMarkup(React.createElement(SavedScr
 test('Saved uses stable IDs and real shared-cache counts, including zero, and refreshes both sources', async () => {
   reset(); const html = render();
   assert.match(html, /Live station/); assert.match(html, />0</); assert.match(html, />6</);
-  assert.match(html, /Unsave station/); assert.equal(listProps.keyExtractor('a'), 'a');
+  assert.match(html, /Unsave Live station/); assert.equal(listProps.keyExtractor('a'), 'a');
   listProps.renderItem({ item: 'a' }).props.children[0].props.onPress();
   assert.equal(opened, station);
   listProps.onRefresh(); await new Promise(resolve => setImmediate(resolve));
@@ -61,25 +61,38 @@ test('missing or offline station data never fabricates counts and retains Unsave
 
 test('Save/Unsave, pending, retry and mutation failures use the shared action and confirmed state', () => {
   reset({ ids: [] });
-  let control = SaveStationButton({ stationId: 'a' }).props.children[0];
-  assert.equal(control.props.label, 'Save station'); control.props.onPress(); assert.equal(toggled, 'a');
-  reset(); control = SaveStationButton({ stationId: 'a' }).props.children[0];
-  assert.equal(control.props.label, 'Unsave station');
-  reset({ pendingId: 'a' }); control = SaveStationButton({ stationId: 'a' }).props.children[0];
-  assert.equal(control.props.disabled, true); assert.match(control.props.label, /Saving changes/);
-  reset({ error: 'Offline' }); control = SaveStationButton({ stationId: 'a' }).props.children[0];
-  assert.match(control.props.label, /Retry/); control.props.onPress(); assert.equal(refreshed, 1);
+  let control = SaveStationButton({ stationId: 'a' });
+  assert.equal(control.props.accessibilityLabel, 'Save station'); control.props.onPress(); assert.equal(toggled, 'a');
+  reset(); control = SaveStationButton({ stationId: 'a' });
+  assert.equal(control.props.accessibilityLabel, 'Unsave station');
+  reset({ pendingId: 'a' }); control = SaveStationButton({ stationId: 'a' });
+  assert.equal(control.props.disabled, true); assert.equal(control.props.accessibilityState.busy, true); assert.equal(control.props.accessibilityState.selected, true);
+  reset({ error: 'Offline' }); control = SaveStationButton({ stationId: 'a' });
+  assert.match(control.props.accessibilityLabel, /Retry/); control.props.onPress(); assert.equal(refreshed, 1);
   reset({ mutationError: { stationId: 'a', message: 'Change failed; try again.' } });
-  const html = renderToStaticMarkup(React.createElement(SaveStationButton, { stationId: 'a' }));
+  const html = renderToStaticMarkup(React.createElement(React.Fragment, null, React.createElement(SaveStationButton, { stationId: 'a' }), React.createElement(SaveStationFeedback, { stationId: 'a' })));
   assert.match(html, /Unsave station/); assert.match(html, /Change failed/);
 });
 
-test('preview offers Save and the compact Explore header opens Saved without removing modes', () => {
+test('preview exposes a named bookmark beside the station name and retains both modes', () => {
   reset({ ids: [] });
-  assert.match(renderToStaticMarkup(React.createElement(StationPreview, { station, mode: 'bikes', onOpen() {}, onClose() {} })), /Save station/);
-  let navigated = false;
-  const header = ExploreHeader({ state: initialExploreState, dispatch() {}, onAccount() {}, onSaved: () => { navigated = true; } });
-  header.props.children[0].props.children[1].props.onPress(); assert.equal(navigated, true);
-  const html = renderToStaticMarkup(header);
-  assert.match(html, /Find a bike/); assert.match(html, /Find a dock/); assert.match(html, /Saved/);
+  assert.match(renderToStaticMarkup(React.createElement(StationPreview, { station, mode: 'bikes', onOpen() {}, onClose() {} })), /Save Live station/);
+  const html = renderToStaticMarkup(ExploreHeader({ state: initialExploreState, dispatch() {} }));
+  assert.match(html, /Find a bike/); assert.match(html, /Find a dock/);
+  assert.doesNotMatch(html, />Saved</);
+});
+
+test('bookmark has a 44pt target, waits for initial state and blocks concurrent writes', () => {
+  reset({ ids: null, isFetching: false });
+  let button = SaveStationButton({ stationId: 'a', stationName: 'Test station' });
+  assert.equal(button.props.disabled, true); assert.equal(button.props.accessibilityState.busy, true);
+  const style = native.StyleSheet.flatten(button.props.style({ pressed: false }));
+  assert.ok(style.minWidth >= 44 && style.minHeight >= 44);
+  reset({ pendingId: 'b' });
+  button = SaveStationButton({ stationId: 'a' });
+  assert.equal(button.props.disabled, true);
+  assert.equal(button.props.accessibilityState.selected, true);
+  assert.equal(button.props.accessibilityState.busy, false);
+  reset({ userId: null, ids: null });
+  assert.equal(SaveStationButton({ stationId: 'a' }).props.disabled, true);
 });

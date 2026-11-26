@@ -185,3 +185,17 @@ npx expo start --tunnel
 npx expo install <package>
 npx expo install --check
 ```
+
+## Phase 5 mobile UI polish — 2026-11-26
+
+- [x] Protected Explore/Saved/Account tab shell, detail stacks by origin; auth/callback outside tabs, no duplicate header navigation.
+- [x] Bookmarks beside names, confirmed fill state, pending/disabled feedback and accessible failure/retry; existing ownership store unchanged.
+- [x] Suppress native marker titles/subtitles; retain cluster data, accessibility, selection and custom bounded preview.
+- [x] Compact Explore header; secondary Map/List; prominent Bike/Dock; large detail counts and Get Directions before metadata.
+- [x] Small status indicator with refresh/source panel, source-aware freshness and non-green cached/error/unknown dots. Connection failure is not presented as confirmed airplane mode.
+- [x] Minimum 44pt targets, wrapping/scaling labels, tab-owned bottom safe area and iOS search keyboard avoidance.
+- [x] 97 tests pass; TypeScript, Expo dependency check, iOS/Android Hermes exports and whitespace check pass. No added packages.
+- [x] Update README/PLAN/USERFLOW/MOODBOARD and exact file manifest in [PHASE5_REVIEW.md](docs/PHASE5_REVIEW.md).
+- [ ] Complete the six-part iPhone acceptance checklist in that review, including large text, VoiceOver, small screens, map gestures, native navigation, offline recovery and account isolation.
+- [ ] Run Android physical-device checks. Bundles and mocked UI tests are not device validation.
+- [ ] Existing hosted Supabase/Google configuration and two-account remote RLS verification remain owner tasks; no remote changes, commits or pushes were performed.

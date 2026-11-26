@@ -14,6 +14,8 @@ export const Colors = {
   text: Palette.warmWhite,
   textSecondary: Palette.mutedMint,
   onAccent: Palette.carbon,
+  warning: '#E6BA71',
+  statusNeutral: '#B9BAB7',
 } as const;
 
 export const Spacing = {

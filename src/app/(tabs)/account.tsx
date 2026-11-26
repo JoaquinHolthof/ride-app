@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useAuth } from '@/auth/AuthProvider';
-import { AuthShell, authStyles } from '@/components/AuthScreen';
+import { authStyles } from '@/components/AuthScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors, Layout, Typography } from '@/constants/theme';
 import { ActionButton } from '@/components/ActionButton';
 
 export default function AccountScreen() {
@@ -18,14 +19,16 @@ export default function AccountScreen() {
     try { setError(await signOut()); }
     finally { pending.current = false; setBusy(false); }
   };
-  return <AuthShell title="Your account" description="Signed in to RIDE.">
+  return <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: Colors.background }}>
+    <ScrollView contentContainerStyle={{ padding: 16, gap: 16, width: '100%', maxWidth: Layout.contentMaxWidth, alignSelf: 'center' }}>
+    <Text style={{ ...Typography.label, color: Colors.accent }}>RIDE · YOUR ACCOUNT</Text>
+    <Text accessibilityRole="header" style={{ ...Typography.heading, color: Colors.text }}>Account</Text>
     <View style={authStyles.panel}>
       <Text style={authStyles.text}>{state.session?.user.email}</Text>
       <Text style={authStyles.muted}>Signing out removes this device’s session. Other signed-in devices are unaffected.</Text>
     </View>
     {error && <Text accessibilityRole="alert" style={authStyles.text}>{error}</Text>}
     <ActionButton label={busy ? 'Signing out…' : 'Sign Out'} disabled={busy} onPress={() => { void leave(); }} />
-    <ActionButton label="Back to Explore" variant="secondary" disabled={busy}
-      onPress={() => router.canGoBack() ? router.back() : router.replace('/')} />
-  </AuthShell>;
+    </ScrollView>
+  </SafeAreaView>;
 }

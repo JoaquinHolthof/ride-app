@@ -7,6 +7,7 @@ const ts = require('typescript');
 const sourceRoot = path.resolve(__dirname, '../src');
 const originalLoad = Module._load;
 const mocks = new Map();
+mocks.set('expo-symbols', { SymbolView: () => null });
 Module._load = function (request, parent, isMain) {
   if (mocks.has(request)) return mocks.get(request);
   if (request === 'react-native') request = 'react-native-web';

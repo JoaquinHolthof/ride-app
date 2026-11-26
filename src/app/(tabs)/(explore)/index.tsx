@@ -26,10 +26,9 @@ export default function HomeScreen() {
   const onRegionChange = useCallback((next: MapRegion) => { region.current = next; }, []);
   const onOpen = useCallback((station: Station) => {
     dispatch({ type: 'select', value: station.id });
-    router.push({ pathname: '/station/[id]', params: { id: station.id, mode: state.mode } });
+    router.push({ pathname: '/(tabs)/(explore)/station/[id]', params: { id: station.id, mode: state.mode } });
   }, [state.mode]);
   return <ExploreScreen feed={feed} state={state} stations={stations} selected={selected} dispatch={dispatch}
-    onOpen={onOpen} onSelect={onSelect} onAccount={() => router.push('/account')}
-    onSaved={() => router.push({ pathname: '/saved', params: { mode: state.mode } })}
+    onOpen={onOpen} onSelect={onSelect}
     region={region.current} onRegionChange={onRegionChange} height={height} />;
 }

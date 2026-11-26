@@ -30,3 +30,7 @@ Current initial screens: Home, Explore/Bikes, Station details, Saved. Add or ext
 Gather at least 6–8 *actual mobile UI* references: map-based apps, mobility apps, transit station detail screens, searching/filter interfaces, bottom-navigation patterns, typographic UI, empty/error states. Photos of cyclists and palette swatches can supplement but must not substitute for UI references (lesson 07, p.60).
 
 Document why each reference is useful; do not copy a reference or the official Velo Antwerpen UI wholesale.
+
+## Phase 5 implementation — 2026-11-26
+
+Keep the approved urban editorial direction: carbon/forest surfaces, warm-white names, large availability numerals, lime for primary Bike/Dock and confirmed active controls. Use one compact bottom bar, system map/bookmark/account symbols and restrained metadata. Detail counts use 64pt type; status/tab captions may use 13–14pt with native text scaling. Touch targets remain at least 44pt regardless of visible icon/chip size. Amber (#E6BA71) signals old/error data; neutral grey (#B9BAB7) signals loading/unknown source time. Stale status never uses lime. Physical-device review is pending; see [Phase 5 checklist](docs/PHASE5_REVIEW.md).

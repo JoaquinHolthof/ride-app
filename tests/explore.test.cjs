@@ -132,10 +132,11 @@ test('native pins use real coordinates, mode labels and availability without cus
   render(StationMap, props);
   assert.equal(markers.length, 4);
   assert.deepEqual(markers[0].coordinate, { latitude: 51.21, longitude: 4.41 });
-  assert.match(markers[0].title, /12 bikes available/);
+  assert.match(markers[0].accessibilityLabel, /12 bikes available/);
   assert.notEqual(markers[0].pinColor, markers[1].pinColor);
   assert.notEqual(markers[1].pinColor, markers[2].pinColor);
   assert.equal(markers[0].children, undefined);
+  assert.ok(markers.every(marker => marker.title === undefined && marker.description === undefined));
   assert.equal(markers[0].tracksViewChanges, false);
   assert.equal(mapProps.region, undefined); // Uncontrolled map gestures.
   assert.equal(mapProps.showsUserLocation, false);
@@ -143,8 +144,8 @@ test('native pins use real coordinates, mode labels and availability without cus
   assert.equal(selected, 'a');
   markers = [];
   render(StationMap, { ...props, mode: 'docks' });
-  assert.match(markers[0].title, /No free docks/);
-  assert.match(markers[1].title, /20 docks free/);
+  assert.match(markers[0].accessibilityLabel, /No free docks/);
+  assert.match(markers[1].accessibilityLabel, /20 docks free/);
 });
 
 test('clusters show only a compact count, retain mode status, and keep selected pins separate', () => {
@@ -158,8 +159,9 @@ test('clusters show only a compact count, retain mode status, and keep selected 
     return markers[0];
   }
   const bike = cluster(props);
+  assert.equal(bike.title, undefined); assert.equal(bike.description, undefined);
   assert.match(bike.accessibilityLabel, /2 stations/);
-  assert.match(bike.title, /24 known bikes/);
+  assert.match(bike.accessibilityLabel, /24 known bikes/);
   const badge = renderToStaticMarkup(bike.children);
   assert.match(badge, />2</);
   assert.doesNotMatch(badge, /stations/);
@@ -169,13 +171,13 @@ test('clusters show only a compact count, retain mode status, and keep selected 
   assert.equal(badgeStyle.backgroundColor, Colors.surface);
   assert.equal(badgeStyle.borderColor, Colors.accent);
   const dock = cluster({ ...props, mode: 'docks' });
-  assert.match(dock.title, /0 known docks/);
+  assert.match(dock.accessibilityLabel, /0 known docks/);
   assert.equal(native.StyleSheet.flatten(dock.children.props.style).borderColor, Colors.textSecondary);
   const unknown = cluster({ ...props, stations: props.stations.map(s => ({ ...s, free_bikes: null })) });
-  assert.match(unknown.title, /2 unknown/);
+  assert.match(unknown.accessibilityLabel, /2 unknown/);
   assert.equal(native.StyleSheet.flatten(unknown.children.props.style).borderColor, Colors.text);
   const closed = cluster({ ...props, stations: props.stations.map(s => ({ ...s, closed: true })) });
-  assert.match(closed.title, /0 known bikes/);
+  assert.match(closed.accessibilityLabel, /0 known bikes/);
   markers = [];
   render(StationMap, { ...props, selectedId: 'a' });
   const selected = markers.find(pin => pin.identifier === 'a');

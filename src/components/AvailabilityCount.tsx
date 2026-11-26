@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 
-export function AvailabilityCount({ value, label, highlighted = true }: { value: number | null; label: string; highlighted?: boolean }) {
+export function AvailabilityCount({ value, label, highlighted = true, prominent = false }: { value: number | null; label: string; highlighted?: boolean; prominent?: boolean }) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.number, (!highlighted || value === null || value === 0) && styles.unavailable]}>{value ?? '—'}</Text>
+      <Text style={[styles.number, prominent && { fontSize: 64, lineHeight: 72 }, (!highlighted || value === null || value === 0) && styles.unavailable]}>{value ?? '—'}</Text>
       <Text style={styles.label}>{label}</Text>
       {value === null && <Text style={styles.label}>Unknown</Text>}
     </View>

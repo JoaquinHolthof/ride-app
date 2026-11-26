@@ -1,5 +1,13 @@
 # RIDE — Userflow
 
+## Phase 5 tab navigation and mobile polish
+
+Signed-in app → persistent Explore / Saved / Account tabs. Explore retains Map/List, mode/search/filter, camera and selection state when changing tabs. Details open inside Explore or Saved and return to the originating tab; bottom tabs remain visible. Login, signup and callback screens remain outside the protected tab shell.
+
+Station name → bookmark (outlined = not saved, filled = saved) → pending indicator → confirmed state. Failures keep the previous confirmed state and expose an accessible error/retry action. Preview and detail share the same user-scoped favourites store.
+
+Map pin → RIDE preview only; cluster → zoom or member list → preview. Small status indicator → data panel → refresh/retry, fetch age and CityBikes attribution. Stale or failed data never receives a fresh/green state. Screen content and preview scroll within their bounds above the bottom safe area; list search avoids the keyboard.
+
 ## Phase 4.3 Saved stations
 
 Sign in → fresh account-scoped Saved load → Explore. Station detail or selected map preview → Save station → wait for server acknowledgement → Saved state everywhere. Tap Unsave → successful delete → remove from Saved. Failed/offline writes keep the last confirmed state and offer retry; there is no background write queue.
@@ -76,3 +84,9 @@ Open Explore → choose Find a bike or Find a dock → search by station name / 
 - The compact Map / List switch retains the same search/filter state; open List to search. Find a bike / Find a dock remains visible above the flex map.
 - Count-only cluster badges retain the same zoom/member chooser actions. VoiceOver still announces the station count and action; selected stations remain separate native pins.
 - Open details → read the selected station's live bike/dock counts → Get Directions. Address and source update time remain visible; expand Technical information only to inspect coordinates. Refresh, cached/error messages and CityBikes credit remain available below.
+
+### Phase 5 status and validation notes — 2026-11-26
+
+A recent fetch alone does not guarantee fresh source data. The small indicator uses fresh lime only when fetch and all known station source times meet freshness thresholds; old/unknown timestamps are amber/neutral. Connection failures say “Connection issue” and mark retained results cached; the app does not infer airplane mode. Refresh/retry remains available in the chip's data panel and compact list/detail controls.
+
+97 automated tests, TypeScript, dependency and both native bundle checks pass. Phone acceptance is pending; use [PHASE5_REVIEW.md](docs/PHASE5_REVIEW.md). Earlier account shortcuts/large Save buttons are superseded by the tab/bookmark flow above.

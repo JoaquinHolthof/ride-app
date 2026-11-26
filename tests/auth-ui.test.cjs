@@ -37,16 +37,15 @@ test('root declares all existing routes protected and removes them on sign out',
   let html = render(AuthNavigator);
   assert.match(html, /name="login"/); assert.match(html, /name="signup"/); assert.match(html, /name="confirm-email"/);
   assert.match(html, /name="auth\/callback"/);
-  assert.doesNotMatch(html, /name="saved"/);
+  assert.doesNotMatch(html, /name="\(tabs\)"/);
   assert.doesNotMatch(html, /name="index"|name="station\/\[id\]"|name="account"/);
   setState({ status: 'ready', session: { user: { id: 'fixture' } }, error: null });
   html = render(AuthNavigator);
-  assert.match(html, /name="index"/); assert.match(html, /name="station\/\[id\]"/); assert.match(html, /name="account"/);
-  assert.match(html, /name="saved"/);
+  assert.match(html, /name="\(tabs\)"/);
   assert.match(html, /name="auth\/callback"/);
   assert.doesNotMatch(html, /name="login"|name="signup"|name="confirm-email"/);
   setState({ status: 'ready', session: null, error: null });
-  assert.doesNotMatch(render(AuthNavigator), /name="account"|name="index"|name="saved"/);
+  assert.doesNotMatch(render(AuthNavigator), /name="\(tabs\)"/);
 });
 test('auth forms expose email/password fields and confirmation guidance without sensitive route parameters', () => {
   setState({ status: 'ready', session: null, error: null });
@@ -60,14 +59,10 @@ test('auth forms expose email/password fields and confirmation guidance without 
   actions[1].props.onPress();
   assert.equal(navigation, '/login');
 });
-test('Explore account shortcut preserves compact header and calls its navigation callback', () => {
-  let opened = false;
-  const header = ExploreHeader({ state: initialExploreState, dispatch() {}, onAccount: () => { opened = true; } });
-  const account = header.props.children[0].props.children[0];
-  assert.equal(account.props.accessibilityLabel, 'RIDE account');
-  const style = native.StyleSheet.flatten(account.props.style({ pressed: false }));
-  assert.ok(style.minHeight >= 44 && style.minWidth >= 44);
-  account.props.onPress(); assert.equal(opened, true);
+test('Explore header has secondary view and primary mode controls without duplicate navigation', () => {
+  const html = renderToStaticMarkup(ExploreHeader({ state: initialExploreState, dispatch() {} }));
+  assert.match(html, /Explore view/); assert.match(html, /Find a bike/); assert.match(html, /Find a dock/);
+  assert.doesNotMatch(html, /RIDE account|>Account<|>Saved</);
 });
 
 test('Expo Go Google button explains the development-build requirement alongside email login', () => {

@@ -3,17 +3,18 @@ import { Colors, Layout, Radius, Spacing, Typography } from '@/constants/theme';
 
 interface Props<T extends string> {
   label: string;
+  subtle?: boolean;
   value: T;
   options: readonly { value: T; label: string; accessibilityLabel?: string }[];
   onChange: (value: T) => void;
 }
-export function SegmentedControl<T extends string>({ label, value, options, onChange }: Props<T>) {
+export function SegmentedControl<T extends string>({ label, value, options, onChange, subtle = false }: Props<T>) {
   return <View accessibilityRole="tablist" accessibilityLabel={label} style={styles.container}>
     {options.map(option => <Pressable key={option.value} accessibilityRole="tab"
       accessibilityLabel={option.accessibilityLabel ?? option.label}
       accessibilityState={{ selected: value === option.value }}
       onPress={() => onChange(option.value)} style={({ pressed }) => [styles.tab,
-        value === option.value && styles.active, pressed && styles.pressed]}>
+        value === option.value && [styles.active, subtle && { backgroundColor: Colors.text }], pressed && styles.pressed]}>
       <Text style={[styles.text, value === option.value && styles.activeText]}>{option.label}</Text>
     </Pressable>)}
   </View>;

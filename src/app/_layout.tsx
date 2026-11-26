@@ -45,10 +45,7 @@ export function AuthNavigator() {
           <Stack.Screen name="confirm-email" options={{ title: 'Confirm email' }} />
         </Stack.Protected>
         <Stack.Protected guard={access.protected}>
-          <Stack.Screen name="index" options={{ title: 'RIDE' }} />
-          <Stack.Screen name="station/[id]" options={{ title: 'Station details' }} />
-          <Stack.Screen name="account" options={{ title: 'Account' }} />
-          <Stack.Screen name="saved" options={{ title: 'Saved stations' }} />
+          <Stack.Screen name="(tabs)" options={{ title: 'RIDE' }} />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" options={{ title: 'Complete sign-in' }} />
       </Stack>;

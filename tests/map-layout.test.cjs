@@ -52,7 +52,7 @@ test('List retains searchable/filterable content and does not mount a map', () =
   const html = render({ ...props, state: { ...initialExploreState, view: 'list' } });
   assert.match(html, /Search stations by name/);
   assert.match(html, /All stations/);
-  assert.match(html, /Refresh stations/);
+  assert.match(html, /Refresh station data/);
   assert.doesNotMatch(html, /ride-map/);
 });
 
@@ -60,6 +60,6 @@ test('map data badge exposes cached/error state and attribution access without f
   const html = renderToStaticMarkup(React.createElement(MapDataPanel, {
     feed: { ...feed, error: 'Offline', now: 100_000 }, unmapped: 0,
   }));
-  assert.match(html, /Cached · refresh failed/);
+  assert.match(html, /Connection issue/);
   assert.match(html, /CityBikes attribution/);
 });

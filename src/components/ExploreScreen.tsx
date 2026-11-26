@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Dispatch } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Station } from '@/api/citybikes';
 import { Colors, Layout, Radius, Spacing, Typography } from '@/constants/theme';
@@ -24,8 +24,6 @@ interface Props {
   selected: Station | null;
   dispatch: Dispatch<ExploreAction>;
   onOpen: (station: Station) => void;
-  onAccount: () => void;
-  onSaved: () => void;
   onSelect: (id: string) => void;
   region: MapRegion;
   onRegionChange: (region: MapRegion) => void;
@@ -42,16 +40,11 @@ function EmptyResults({ feed, state, dispatch }: Pick<Props, 'feed' | 'state' | 
   return <StateMessage title="No stations to show" description="CityBikes returned an empty list. Refresh to try again." />;
 }
 
-export function ExploreHeader({ state, dispatch, onAccount, onSaved }: Pick<Props, 'state' | 'dispatch' | 'onAccount' | 'onSaved'>) {
+export function ExploreHeader({ state, dispatch }: Pick<Props, 'state' | 'dispatch'>) {
   return <View testID="explore-header" style={styles.header}>
     <View style={styles.topline}>
-      <Pressable accessibilityRole="button" accessibilityLabel="RIDE account" accessibilityHint="Open your account and sign out"
-        onPress={onAccount} style={({ pressed }) => [styles.brandBlock, pressed && styles.pressed]}>
-        <Text style={styles.brand}>RIDE</Text>
-        <Text style={styles.accountLabel}>Account</Text>
-      </Pressable>
-      <ActionButton label="Saved" variant="secondary" onPress={onSaved} />
-      <View style={styles.viewSwitch}><SegmentedControl label="Explore view" value={state.view} onChange={value => dispatch({ type: 'view', value })}
+      <View style={styles.brandBlock}><Text style={styles.brand}>RIDE</Text></View>
+      <View style={styles.viewSwitch}><SegmentedControl subtle label="Explore view" value={state.view} onChange={value => dispatch({ type: 'view', value })}
         options={[{ value: 'map', label: 'Map' }, { value: 'list', label: 'List', accessibilityLabel: 'List and station search' }]} /></View>
     </View>
     <SegmentedControl label="Find a bike or a dock" value={state.mode} onChange={value => dispatch({ type: 'mode', value })}
@@ -101,9 +94,11 @@ export function ExploreScreen(props: Props) {
   const [mapHeight, setMapHeight] = useState(height * 0.7);
   const [previewHeight, setPreviewHeight] = useState(0);
   const filtered = !!state.query.trim() || state.filter !== 'all';
-  return <SafeAreaView style={styles.safeArea}>
-    <ExploreHeader state={state} dispatch={dispatch} onAccount={props.onAccount} onSaved={props.onSaved} />
-    {state.view === 'list' ? <StationList {...props} header={controls} empty={empty} /> :
+  return <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
+    <ExploreHeader state={state} dispatch={dispatch} />
+    {state.view === 'list' ? <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <StationList {...props} header={controls} empty={empty} />
+    </KeyboardAvoidingView> :
       <View testID="explore-map-viewport" style={styles.mapArea} onLayout={event => setMapHeight(event.nativeEvent.layout.height)}>
         {stations.length > 0 ? <StationMap stations={stations} mode={state.mode} selectedId={selected?.id ?? null}
           onSelect={onSelect} initialRegion={region} onRegionChange={onRegionChange}
@@ -131,7 +126,6 @@ const styles = StyleSheet.create({
   topline: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.sm },
   brandBlock: { flexGrow: 1, flexShrink: 0, minHeight: Layout.minTouchTarget, minWidth: Layout.minTouchTarget,
     flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  accountLabel: { ...Typography.label, color: Colors.textSecondary },
   brand: { ...Typography.heading, fontSize: 28, lineHeight: 32, color: Colors.accent, fontWeight: '900', fontStyle: 'italic' },
   viewSwitch: { flexGrow: 1, flexShrink: 0, flexBasis: 160, maxWidth: 184 },
   searchRow: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: Radius.sm, alignItems: 'center' },

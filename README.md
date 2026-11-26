@@ -2,6 +2,16 @@
 
 A mobile-first React Native / Expo app for AP University's Minor Visual Code assignment. Built with Expo SDK 58, Expo Router and TypeScript, using the original carbon/forest/electric-lime design in `MOODBOARD.md`.
 
+## Phase 5: mobile UI polish — 2026-11-26
+
+RIDE now uses persistent **Explore / Saved / Account** tabs, with Map/List inside Explore. Station previews, details and Saved use accessible bookmarks beside station names. Details feature larger counts and clearer hierarchy; native marker callouts are suppressed in favour of RIDE's preview. Compact data indicators distinguish fresh, cached, loading, connection and service-error states, with refresh/retry and CityBikes attribution retained.
+
+The existing auth, private favourites store, RLS migration and CityBikes/map logic are preserved. No dependencies or remote configuration changes were added. **97 tests pass**, TypeScript and Expo dependency checks pass, and iOS/Android Hermes exports pass. Native UI, VoiceOver and physical-device verification remain pending.
+
+See [the complete change manifest, validation details and iPhone checklist](docs/PHASE5_REVIEW.md). Test the UI with email login in SDK 58-compatible Expo Go; Google and scheme callbacks still require a configured development build. Existing manual [auth setup](docs/AUTH_SETUP.md) and [database/RLS setup](docs/FAVOURITES_SETUP.md) remain applicable.
+
+The phase records below are historical; Phase 5 supersedes their navigation and Save-button descriptions.
+
 ## Phase 4.3: Supabase Saved stations — 2026-11-25
 
 Authenticated users can **Save/Unsave** from a station's details or selected map preview and open the protected **Saved** screen from Explore. Saved IDs are stored in Supabase; live bikes/docks come from the existing CityBikes cache. Zero counts stay zero, missing stations remain removable, and loading/empty/error/offline states offer recovery. Failed writes retain confirmed state, never queue offline or claim success.

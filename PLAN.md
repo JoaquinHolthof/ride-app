@@ -77,6 +77,15 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - Supabase Auth and the single favourites table are authorized through Phase 4.3; no custom backend or other application tables.
 
 ## Priorities
+### Phase 5: complete mobile UI/UX polish (current scope)
+- Follow the approved urban editorial carbon/forest/lime moodboard. Preserve all CityBikes, auth, favourites ownership/RLS, geographic clustering and native-map behaviour.
+- Use one protected Expo Router tab shell: Explore, Saved, Account. Explore and Saved each own a stack with shared station-detail UI, so the bottom bar persists and Back returns to the originating tab. Map/List stays inside Explore; remove redundant header navigation. The bar owns bottom safe-area padding; tab screens own top/side insets.
+- Replace large Save buttons with a 44 pt bookmark beside station names, outlined/filled confirmed state, busy feedback and accessible recovery for errors. Keep the existing favourites API/store unchanged.
+- Suppress native marker callouts by removing titles/descriptions; preserve native pins, accessibility labels, selection ring and clustering. Keep the custom preview bounded and scrollable at large text sizes.
+- Tighten details around name/bookmark, prominent counts, Get Directions and concise metadata; retain closed/unknown/zero information, source age, optional technical detail and CityBikes attribution.
+- Use a small data-status indicator opening refresh/retry/source details. Fresh, cached, loading, connection failure/offline and other errors must have accurate text and distinct non-green stale/error colours. No assumed connectivity detection.
+- Run full regression/RLS tests, TypeScript, Expo dependency checks and native bundle exports; document device checks. No commits, pushes, remote SQL or provider changes.
+
 ### Phase 4.3: authenticated Supabase Saved stations (current scope)
 - This explicit request supersedes the local-only/no-database restriction for favourites. Store only `user_id` and CityBikes `station_id` in `public.favourites`; a composite primary key prevents duplicates and indexes ownership queries. RLS and SELECT/INSERT/DELETE-only grants enforce ownership; no UPDATE/public access or service-role app key.
 - Deliver a CLI-created, version-controlled migration and exact SQL Editor setup plus two-account attack tests. Never execute remote SQL automatically.
@@ -138,3 +147,7 @@ First load, loading, success, zero bikes, zero docks, empty search, failed reque
 - Full source ZIP without `node_modules`
 - Final presentation and recorded demo video
 - Do not push or upload anywhere without the owner's authorization.
+
+## Phase 5 outcome — 2026-11-26
+
+Implemented the protected tab shell and per-origin detail stacks, bookmark controls, compact Explore/Saved/Account layouts, larger detail counts, suppressed native callouts and source-aware status colours. Reused existing SDK 58 libraries; auth, favourites ownership/cache and CityBikes fetching/clustering logic are retained. All 97 tests, TypeScript, Expo dependency checks and iOS/Android Hermes exports pass. No native builds, hosted changes, commits or pushes. Exact manifest and pending iPhone/Android acceptance steps: [PHASE5_REVIEW.md](docs/PHASE5_REVIEW.md).

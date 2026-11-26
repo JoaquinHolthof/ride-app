@@ -12,12 +12,12 @@ let navigated;
 mocks.set('@/hooks/use-stations', { useStations: () => feed });
 mocks.set('react-native-safe-area-context', { SafeAreaView: native.View });
 mocks.set('expo-router', { useLocalSearchParams: () => ({ id: selectedId }), router: {
-  push: route => { navigated = route; }, canGoBack: () => false, replace: () => {}, back: () => {},
+  push: route => { navigated = route; }, canGoBack: () => false, replace: route => { navigated = route; }, back: () => { navigated = 'back'; },
 } });
-const Home = require('../src/app/index.tsx').default;
+const Home = require('../src/app/(tabs)/(explore)/index.tsx').default;
 const { StationList } = require('../src/components/ExploreScreen.tsx');
 const { initialExploreState } = require('../src/utils/explore.ts');
-const Detail = require('../src/app/station/[id].tsx').default;
+const Detail = require('../src/screens/StationDetailScreen.tsx').default;
 const { StationCard } = require('../src/components/StationCard.tsx');
 const { DataStatus } = require('../src/components/DataStatus.tsx');
 const { ActionButton } = require('../src/components/ActionButton.tsx');
@@ -123,4 +123,15 @@ test('technical information starts collapsed and coordinate content uses selecte
   assert.match(coordinates(station), /Longitude 4.41000/);
   assert.match(coordinates({ ...station, latitude: null }), /Coordinates unavailable/);
   assert.match(coordinates({ ...station, latitude: NaN }), /Coordinates unavailable/);
+});
+
+test('detail preserves Saved origin for a direct-link back fallback and excludes bottom safe area', () => {
+  reset({ data: data() }); selectedId = 'a';
+  const screen = Detail({ origin: 'saved' });
+  assert.deepEqual(screen.props.edges, ['top', 'left', 'right']);
+  const back = screen.props.children.props.children[0];
+  assert.equal(back.props.accessibilityLabel, 'Back to Saved');
+  back.props.onPress(); assert.equal(navigated, '/saved');
+  Detail({ origin: 'explore' }).props.children.props.children[0].props.onPress();
+  assert.equal(navigated, '/');
 });

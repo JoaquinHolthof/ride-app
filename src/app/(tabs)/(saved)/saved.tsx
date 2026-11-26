@@ -11,6 +11,6 @@ export default function SavedRoute() {
   const feed = useStations();
   useFocusEffect(useCallback(() => { void favourites.refresh(); }, [favourites.refresh]));
   return <SavedScreen favourites={favourites} feed={feed} mode={selectedMode}
-    onExplore={() => router.canGoBack() ? router.back() : router.replace('/')}
-    onOpen={station => router.push({ pathname: '/station/[id]', params: { id: station.id, mode: selectedMode } })} />;
+    onExplore={() => router.navigate('/(tabs)/(explore)')}
+    onOpen={station => router.push({ pathname: '/(tabs)/(saved)/station/[id]', params: { id: station.id, mode: selectedMode } })} />;
 }
